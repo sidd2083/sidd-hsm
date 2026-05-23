@@ -1,0 +1,109 @@
+You are an elite full-stack engineer and web architect. Your task is to generate a fully realized, production-ready, single-page Prediction Market application called "Campus Exchange," designed specifically for a college ecosystem. This app is modeled closely after Polymarket but runs on a completely customized, risk-free virtual economy. 
+
+The codebase must be completely finished with zero placeholder text, zero comment shortcuts (e.g., "// implement later"), and zero missing logic blocks. Everything must work perfectly in one shot.
+
+---
+
+### 🛠️ 1. TECH STACK & DEPLOYMENT SPECS
+- Frontend Architecture: Semantic HTML5, native CSS3 (utilizing pure CSS Grid and Flexbox for structural layout), and modular Vanilla JavaScript (ES6+).
+- Backend & Storage Layer: Firebase v10 SDK integration. Use Firebase Authentication for Google One-Tap Sign-In, and Firebase Firestore for real-time data streaming and wallet updates.
+- Hosting Optimization: Structure the code to be statically compiled and deployed instantly with maximum asset caching on Vercel.
+
+---
+
+### 🎨 2. PREMIUM, MINIMALIST UI & DESIGN SYSTEM
+- The UI MUST look like a premium, professional, hand-crafted financial platform. Strictly BAN typical AI-generated template styles: no neon purple glowing drop shadows, no floating geometric shapes, no heavy background animation scripts, and no slow text-typing loops.
+- Layout Aesthetic: High-contrast, hyper-clean minimal dashboard layout. Use sharp 90-degree blocky card borders, elegant lines, generous whitespace, and monospace typography for numerical readouts and currency stats to give it a precise trading desk feel.
+- Color Palette: 
+  * Background: Solid off-white or matte charcoal slate.
+  * Typography: Deep slate or true black headers.
+  * Accents: Flat, solid color fills for category badges (e.g., solid gray, muted green, or flat indigo).
+- Micro-interactions: Use hardware-accelerated transitions restricted ONLY to 'transform' and 'opacity' properties to hit a locked 60 FPS performance standard on low-bandwidth mobile networks during school breaks.
+
+---
+
+### 🗂️ 3. DYNAMIC ACQUISITION & USER PROFILE SCHEMA
+When a user signs up via Google Auth, the app must intercept the routing logic if their profile document does not exist in Firestore. Show a non-dismissible setup form with these exact rules:
+
+- Display Name: Custom text string for public leaderboard tracking.
+- Academic Tracking Dropdown (Strict Configuration):
+  * "Class 11 - Science"
+  * "Class 11 - Management"
+  * "Class 12 - Science"
+  * "Class 12 - Management"
+  * "Bachelor"
+- Section Configuration: A clean, open text input field (`<input type="text">`) allowing users to type their section freely (which can be safely refactored to a hardcoded select dropdown in the future).
+- Seed Capital Influx: The exact millisecond they hit save, create their database record, initialize their wallet balance with exactly **Rs. 100,000.00 (1 Lakh)** as a starting gift, and mount the live dashboard.
+
+---
+
+### 🧮 4. THE MATHEMTICAL ENGINE & PARIMUTUEL POOL LOGIC
+Do NOT use a lazy fixed-odds system or a simple double-your-money mechanic. You must implement a proper Parimutuel Betting Pool Engine where payout multipliers swing dynamically based on public market volume.
+
+1. Live Probability & Multiplier Formulas:
+   - Total Market Pool = yesPool + noPool
+   - YES Multiplier = Total Market Pool / yesPool (Expressed live on-screen as an "X" value, e.g., "1.34x")
+   - NO Multiplier = Total Market Pool / noPool (Expressed live on-screen as an "X" value, e.g., "4.15x")
+   - The UI must calculate and render these numbers in real time as money pools shift. If a pool is brand new and empty, default the calculations to an even "2.00x" split.
+
+2. Fixed Stake Proportional Payout Logic:
+   The system must calculate historical returns based on the user's specific pool stake percentage *at the time they placed their bet*.
+   - When a user bets, they are buying a portion of that specific side's pool.
+   - Payout Algorithm: User Payout = (User's Amount Bet / Total Cash in that specific pool at the time of purchase) * Total Combined Final Pool Cash.
+   - Example Impact: If 90% of the school bets on Spain (YES) and only 10% bets on Portugal (NO), the YES multiplier drops near 1.1x while the NO multiplier climbs to 10.0x. If Portugal pulls off an upset and the admin resolves the market as NO, the platform seizes the entire Rs. 90,000 Spain pool and distributes it proportionally among the Portugal backers. Someone who bet Rs. 1,000 on Portugal early walks away with a massive Rs. 10,000 cash out.
+
+3. Automated Server-Side Time-Lock Protocol:
+   Every single market document contains a `lockTimestamp` (Unix epoch milliseconds). The millisecond a user clicks a button to execute a bet transaction, the script must perform an instant evaluation check:
+   - If (Date.now() >= market.lockTimestamp), instantly block the transaction, reject the trade, disable the interactive UI buttons, and flag the card with a clear, solid, visual `🔒 Locked` status badge.
+
+4. The 24-Hour Engagement Stimulus:
+   Implement an automated daily allowance check. The first time a logged-in user hits the platform past 06:00 AM each day, verify if `lastDailyClaimDate != currentLocalDate`. If true, execute an atomic Firestore transaction to update the date field and instantly credit `+Rs. 100` straight into their profile balance.
+
+---
+
+### 🗂️ 5. FIRESTORE DATABASE ARCHITECTURE
+Build out connection handles mapping directly to these three collections:
+
+1. `users` Collection:
+   - Document ID: Google Auth `uid`
+   - Fields: `email` (string), `displayName` (string), `academicStream` (string), `section` (string), `walletBalance` (number), `lastDailyClaimDate` (string: YYYY-MM-DD).
+
+2. `markets` Collection:
+   - Document ID: Auto-generated string
+   - Fields: `question` (string), `category` (string: "sports", "college", "social", "national"), `lockTimestamp` (number), `status` (string: "active", "locked", "resolved"), `yesPool` (number), `noPool` (number), `winningOutcome` (string: null, "YES", or "NO").
+
+3. `bets` Collection:
+   - Document ID: Auto-generated string
+   - Fields: `userId` (string), `marketId` (string), `type` (string: "YES" or "NO"), `amountPaid` (number).
+
+---
+
+### 💻 6. CORE INTERFACE & STRUCTURAL SCREEN MAP
+
+1. Public View (Read-Only Interface):
+   - Visitors who are not logged in can see all active markets grouped by tabs, view live percentage progress bars, and track shifting multipliers.
+   - However, all betting interaction buttons are completely disabled. The top-right navigation header renders a prominent, clean **[ Sign In with Google ]** button.
+
+2. Authenticated Main Dashboard View:
+   - The navigation header switches to display the user's Display Name, their compiled Class/Section badge (e.g., `12-Science / Sec-A`), and their glowing live wallet readout (`🪙 Balance: Rs. 100,000`).
+   - Category Filter Hub: Provide crisp, clean filter navigation buttons: **( All ) ( ⚽ Sports ) ( 🏫 College ) ( 📱 Social Media ) ( 🌐 National Affairs )**. Clicking these updates the active card grid instantly without reloading the page.
+
+3. The Ultra-Competitive Leaderboard Engine:
+   - A perfectly clean, high-performance table ranking students by their Total Net Worth ($Wallet Cash + Active Staked Asset Values$).
+   - Horizon Tabs: Users can cycle views through **[ Daily ] [ Weekly ] [ All-Time ]**.
+   - Performance Filters: Provide independent tabs to view **[ Most Riches ]**, **[ Top Profit Margins ]**, and **[ The Loss Wall ]** (a playful tracking list showing who has lost the biggest pools to spark conversation in the corridors).
+
+4. Secure Administrative Dashboard Command Center (`/admin`):
+   - A hidden panel mounted at the `/admin` route path, completely secured behind a secondary password authentication wall.
+   - Build out these exact admin tools:
+     * Create New Market: Clean form inputs to type the Question text, choose the Category dropdown, and select an exact calendar lock date and time.
+     * Active Content Feed: A simple overview list showing all active posts on the platform.
+     * Manual Wallet Adjustments: An internal control to search a user's record and manually add or subtract virtual currency for edge-case errors.
+     * Pool Resolution Trigger: Two definitive buttons on every card—**[ Resolve YES ]** and **[ Resolve NO ]**. Clicking either button halts all potential modifications, executes the parimutuel payout engine loop to credit the winning users' balances, and marks the market pool as securely archived.
+
+---
+
+### ⚡ 7. CODE EXECUTION & PERFORMANCE MANDATES
+- Write exceptionally clean, modular Javascript. Avoid multiple deep nested layout containers.
+- Implement **Global Event Delegation**. Do NOT attach separate event listeners to every individual betting card. Attach one single master listener to the main landing view shell and track clicks via `e.target.closest('[data-action]')` to maximize memory performance.
+- Provide the entire implementation—HTML structure, CSS variables, and Firestore connection handlers—in a fully unified, operational integration. Every aspect discussed must be present without placeholder cuts or missing logic blocks. Proceed with generation now.
