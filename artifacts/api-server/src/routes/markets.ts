@@ -15,16 +15,26 @@ router.get("/markets", optionalAuth, async (req: AuthRequest, res) => {
 
   if (category) {
     query = query.where("category", "==", category);
-  }
-  if (status) {
+  } else if (status) {
     query = query.where("status", "==", status);
   }
 
-  const snapshot = await query.orderBy("createdAt", "desc").get();
-  const markets = snapshot.docs.map((doc) => ({
+  // Only apply server-side orderBy when no where clause is used (avoids composite index requirement)
+  const needsClientSort = !!(category || status);
+  if (!needsClientSort) {
+    query = query.orderBy("createdAt", "desc");
+  }
+
+  const snapshot = await query.get();
+  let markets = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
-  }));
+  })) as Array<Record<string, unknown>>;
+
+  // Client-side sort when filters are applied
+  if (needsClientSort) {
+    markets = markets.sort((a, b) => ((b["createdAt"] as number) ?? 0) - ((a["createdAt"] as number) ?? 0));
+  }
 
   res.json(markets);
 });

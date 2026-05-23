@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import Leaderboard from "@/pages/leaderboard";
 import MyBets from "@/pages/my-bets";
 import Admin from "@/pages/admin";
+import About from "@/pages/about";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/my-bets" component={MyBets} />
       <Route path="/admin" component={Admin} />
+      <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>
   );
