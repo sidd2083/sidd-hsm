@@ -6,14 +6,18 @@ let initialized = false;
 export function initFirebaseAdmin() {
   if (initialized) return;
 
-  const projectId = process.env["VITE_FIREBASE_PROJECT_ID"];
-  if (!projectId) {
-    throw new Error("VITE_FIREBASE_PROJECT_ID is required");
+  const serviceAccountJson = process.env["FIREBASE_SERVICE_ACCOUNT"];
+  if (!serviceAccountJson) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT env var is required");
   }
 
+  const serviceAccount = JSON.parse(serviceAccountJson) as admin.ServiceAccount;
+
   if (!admin.apps.length) {
-    admin.initializeApp({ projectId });
-    logger.info({ projectId }, "Firebase Admin initialized");
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    logger.info({ projectId: serviceAccount.projectId }, "Firebase Admin initialized");
   }
 
   initialized = true;
