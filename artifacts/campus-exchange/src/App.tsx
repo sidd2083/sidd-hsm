@@ -11,6 +11,8 @@ import Leaderboard from "@/pages/leaderboard";
 import MyBets from "@/pages/my-bets";
 import Admin from "@/pages/admin";
 import About from "@/pages/about";
+import Onboarding from "@/pages/onboarding";
+import Profile from "@/pages/profile";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +24,8 @@ function Router() {
       <Route path="/my-bets" component={MyBets} />
       <Route path="/admin" component={Admin} />
       <Route path="/about" component={About} />
+      <Route path="/onboarding" component={Onboarding} />
+      <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
   );

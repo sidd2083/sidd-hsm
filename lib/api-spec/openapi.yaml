@@ -66,6 +66,23 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateProfile
+      tags: [users]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
 
   /users/me/daily-claim:
     post:
@@ -340,6 +357,22 @@ components:
         section:
           type: string
 
+    UserProfileUpdate:
+      type: object
+      properties:
+        displayName:
+          type: string
+        academicStream:
+          type: string
+          enum:
+            - "Class 11 - Science"
+            - "Class 11 - Management"
+            - "Class 12 - Science"
+            - "Class 12 - Management"
+            - "Bachelor"
+        section:
+          type: string
+
     DailyClaimResult:
       type: object
       required: [claimed, walletBalance]
@@ -347,6 +380,8 @@ components:
         claimed:
           type: boolean
         walletBalance:
+          type: number
+        bonus:
           type: number
 
     Market:
@@ -419,6 +454,11 @@ components:
           type: ["string", "null"]
         winningOutcome:
           type: ["string", "null"]
+        payout:
+          type: ["number", "null"]
+        status:
+          type: string
+          enum: [active, locked, won, lost]
 
     BetInput:
       type: object

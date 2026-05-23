@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
-import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/market-math";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PredicLogo } from "@/components/logo";
@@ -9,9 +8,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, LogOut, BarChart2, Wallet, Menu, X } from "lucide-react";
+import { ChevronDown, LogOut, BarChart2, Wallet, Menu, X, User, Gift, Trophy } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -22,15 +22,16 @@ const categories = [
   { label: "🌐 National", value: "national" },
 ];
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+function NavLink({ href, children, exact = false }: { href: string; children: React.ReactNode; exact?: boolean }) {
   const [location] = useLocation();
-  const active = location === href;
+  const active = exact ? location === href : location.startsWith(href) && href !== "/";
+  const isHome = href === "/" && location === "/";
   return (
     <Link
       href={href}
       className={cn(
-        "text-sm font-medium transition-colors",
-        active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+        "text-sm font-medium transition-colors px-1 py-0.5",
+        (active || isHome) ? "text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
     >
       {children}
@@ -61,8 +62,8 @@ export function Header() {
               </span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-6">
-              <NavLink href="/">Markets</NavLink>
+            <nav className="hidden md:flex items-center gap-5">
+              <NavLink href="/" exact>Markets</NavLink>
 
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none">
@@ -89,37 +90,62 @@ export function Header() {
             {isLoading && user ? (
               <Skeleton className="h-9 w-48 rounded-xl" />
             ) : user && me ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <div className="hidden sm:flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold px-3 py-1.5 rounded-xl font-mono">
                   <Wallet className="w-3.5 h-3.5" />
                   {formatCurrency(me.walletBalance)}
                 </div>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2.5 bg-muted hover:bg-muted/80 rounded-xl px-3 py-1.5 transition-colors outline-none">
+                    <button className="flex items-center gap-2 bg-muted hover:bg-muted/80 rounded-xl px-2.5 py-1.5 transition-colors outline-none border border-border/40 hover:border-border/80">
                       <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
                         {me.displayName?.[0]?.toUpperCase() ?? "U"}
                       </div>
-                      <span className="hidden sm:block text-sm font-medium max-w-[120px] truncate">
+                      <span className="hidden sm:block text-sm font-semibold max-w-[100px] truncate">
                         {me.displayName}
                       </span>
                       <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-52 rounded-xl shadow-xl border-border/60">
-                    <div className="px-3 py-2.5 border-b border-border/60">
-                      <p className="text-sm font-semibold truncate">{me.displayName}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {me.academicStream} · Section {me.section}
-                      </p>
+                  <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-xl border-border/60 p-1.5">
+                    <div className="px-3 py-3 mb-1 bg-gradient-to-br from-violet-50 to-indigo-50 rounded-xl">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+                          {me.displayName?.[0]?.toUpperCase() ?? "U"}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold truncate">{me.displayName}</p>
+                          <p className="text-xs text-violet-600 font-semibold font-mono">{formatCurrency(me.walletBalance)}</p>
+                        </div>
+                      </div>
                     </div>
+
                     <DropdownMenuItem asChild>
-                      <Link href="/my-bets" className="cursor-pointer rounded-lg flex items-center gap-2">
-                        <BarChart2 className="w-4 h-4" /> My Bets
+                      <Link href="/profile" className="cursor-pointer rounded-xl flex items-center gap-2.5 py-2.5 font-medium">
+                        <User className="w-4 h-4 text-muted-foreground" /> My Profile
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/my-bets" className="cursor-pointer rounded-xl flex items-center gap-2.5 py-2.5 font-medium">
+                        <BarChart2 className="w-4 h-4 text-muted-foreground" /> Trade History
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/leaderboard" className="cursor-pointer rounded-xl flex items-center gap-2.5 py-2.5 font-medium">
+                        <Trophy className="w-4 h-4 text-muted-foreground" /> Leaderboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer rounded-xl flex items-center gap-2.5 py-2.5 font-medium">
+                        <Gift className="w-4 h-4 text-muted-foreground" /> Claim Daily Bonus
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator className="my-1" />
+
                     <DropdownMenuItem
-                      className="text-red-600 focus:text-red-600 cursor-pointer rounded-lg flex items-center gap-2"
+                      className="text-red-600 focus:text-red-600 cursor-pointer rounded-xl flex items-center gap-2.5 py-2.5 font-medium"
                       onClick={signOut}
                     >
                       <LogOut className="w-4 h-4" /> Sign Out
@@ -128,12 +154,12 @@ export function Header() {
                 </DropdownMenu>
               </div>
             ) : (
-              <Button
+              <button
                 onClick={signIn}
-                className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/20 rounded-xl font-semibold text-sm px-5"
+                className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/20 rounded-xl font-semibold text-sm px-5 py-2 transition-all"
               >
                 Register Now
-              </Button>
+              </button>
             )}
 
             <button
@@ -151,7 +177,7 @@ export function Header() {
               { href: "/", label: "Markets" },
               { href: "/leaderboard", label: "Leaderboard" },
               { href: "/about", label: "About" },
-              ...(user ? [{ href: "/my-bets", label: "My Bets" }] : []),
+              ...(user ? [{ href: "/my-bets", label: "My Bets" }, { href: "/profile", label: "My Profile" }] : []),
             ].map((item) => (
               <Link
                 key={item.href}

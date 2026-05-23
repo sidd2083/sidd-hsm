@@ -37,9 +37,27 @@ export interface UserProfileInput {
   section: string;
 }
 
+export type UserProfileUpdateAcademicStream = typeof UserProfileUpdateAcademicStream[keyof typeof UserProfileUpdateAcademicStream];
+
+
+export const UserProfileUpdateAcademicStream = {
+  'Class_11_-_Science': 'Class 11 - Science',
+  'Class_11_-_Management': 'Class 11 - Management',
+  'Class_12_-_Science': 'Class 12 - Science',
+  'Class_12_-_Management': 'Class 12 - Management',
+  Bachelor: 'Bachelor',
+} as const;
+
+export interface UserProfileUpdate {
+  displayName?: string;
+  academicStream?: UserProfileUpdateAcademicStream;
+  section?: string;
+}
+
 export interface DailyClaimResult {
   claimed: boolean;
   walletBalance: number;
+  bonus?: number;
 }
 
 export type MarketCategory = typeof MarketCategory[keyof typeof MarketCategory];
@@ -110,6 +128,16 @@ export const BetType = {
   NO: 'NO',
 } as const;
 
+export type BetStatus = typeof BetStatus[keyof typeof BetStatus];
+
+
+export const BetStatus = {
+  active: 'active',
+  locked: 'locked',
+  won: 'won',
+  lost: 'lost',
+} as const;
+
 export interface Bet {
   id: string;
   userId: string;
@@ -124,6 +152,9 @@ export interface Bet {
   marketStatus?: string | null;
   /** @nullable */
   winningOutcome?: string | null;
+  /** @nullable */
+  payout?: number | null;
+  status?: BetStatus;
 }
 
 export type BetInputType = typeof BetInputType[keyof typeof BetInputType];

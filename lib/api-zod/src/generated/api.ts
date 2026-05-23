@@ -42,11 +42,32 @@ export const CreateProfileBody = zod.object({
 
 
 /**
+ * @summary Update user profile
+ */
+export const UpdateProfileBody = zod.object({
+  "displayName": zod.string().optional(),
+  "academicStream": zod.enum(['Class 11 - Science', 'Class 11 - Management', 'Class 12 - Science', 'Class 12 - Management', 'Bachelor']).optional(),
+  "section": zod.string().optional()
+})
+
+export const UpdateProfileResponse = zod.object({
+  "uid": zod.string(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "academicStream": zod.string(),
+  "section": zod.string(),
+  "walletBalance": zod.number(),
+  "lastDailyClaimDate": zod.string().nullable()
+})
+
+
+/**
  * @summary Claim daily Rs. 100 bonus
  */
 export const ClaimDailyBonusResponse = zod.object({
   "claimed": zod.boolean(),
-  "walletBalance": zod.number()
+  "walletBalance": zod.number(),
+  "bonus": zod.number().optional()
 })
 
 
@@ -109,7 +130,9 @@ export const GetMarketBetsResponseItem = zod.object({
   "createdAt": zod.number(),
   "marketQuestion": zod.string().nullish(),
   "marketStatus": zod.string().nullish(),
-  "winningOutcome": zod.string().nullish()
+  "winningOutcome": zod.string().nullish(),
+  "payout": zod.number().nullish(),
+  "status": zod.enum(['active', 'locked', 'won', 'lost']).optional()
 })
 export const GetMarketBetsResponse = zod.array(GetMarketBetsResponseItem)
 
@@ -137,7 +160,9 @@ export const ListMyBetsResponseItem = zod.object({
   "createdAt": zod.number(),
   "marketQuestion": zod.string().nullish(),
   "marketStatus": zod.string().nullish(),
-  "winningOutcome": zod.string().nullish()
+  "winningOutcome": zod.string().nullish(),
+  "payout": zod.number().nullish(),
+  "status": zod.enum(['active', 'locked', 'won', 'lost']).optional()
 })
 export const ListMyBetsResponse = zod.array(ListMyBetsResponseItem)
 

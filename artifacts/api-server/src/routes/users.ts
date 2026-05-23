@@ -50,6 +50,36 @@ router.post("/users/me", requireAuth, async (req: AuthRequest, res) => {
   res.status(201).json({ uid, ...userData });
 });
 
+router.patch("/users/me", requireAuth, async (req: AuthRequest, res) => {
+  const uid = req.uid!;
+  const { displayName, academicStream, section } = req.body as {
+    displayName?: string;
+    academicStream?: string;
+    section?: string;
+  };
+
+  const updates: Record<string, string> = {};
+  if (displayName) updates["displayName"] = displayName;
+  if (academicStream) updates["academicStream"] = academicStream;
+  if (section) updates["section"] = section;
+
+  if (Object.keys(updates).length === 0) {
+    res.status(400).json({ error: "No fields to update" });
+    return;
+  }
+
+  const userRef = db().collection("users").doc(uid);
+  const doc = await userRef.get();
+  if (!doc.exists) {
+    res.status(404).json({ error: "Profile not found" });
+    return;
+  }
+
+  await userRef.update(updates);
+  const updated = await userRef.get();
+  res.json({ uid, ...updated.data() });
+});
+
 router.post(
   "/users/me/daily-claim",
   requireAuth,

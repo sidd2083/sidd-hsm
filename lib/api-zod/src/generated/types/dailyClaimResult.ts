@@ -9,4 +9,5 @@
 export interface DailyClaimResult {
   claimed: boolean;
   walletBalance: number;
+  bonus?: number;
 }

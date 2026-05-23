@@ -5,6 +5,7 @@
  * Campus Exchange API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { BetStatus } from './betStatus';
 import type { BetType } from './betType';
 
 export interface Bet {
@@ -21,4 +22,7 @@ export interface Bet {
   marketStatus?: string | null;
   /** @nullable */
   winningOutcome?: string | null;
+  /** @nullable */
+  payout?: number | null;
+  status?: BetStatus;
 }

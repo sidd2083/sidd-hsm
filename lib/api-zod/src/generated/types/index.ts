@@ -9,6 +9,7 @@
 export * from './bet';
 export * from './betInput';
 export * from './betInputType';
+export * from './betStatus';
 export * from './betType';
 export * from './dailyClaimResult';
 export * from './getLeaderboardParams';
@@ -27,4 +28,6 @@ export * from './marketStatus';
 export * from './user';
 export * from './userProfileInput';
 export * from './userProfileInputAcademicStream';
+export * from './userProfileUpdate';
+export * from './userProfileUpdateAcademicStream';
 export * from './walletAdjustment';
