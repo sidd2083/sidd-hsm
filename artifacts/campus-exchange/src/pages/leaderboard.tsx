@@ -17,7 +17,7 @@ export default function Leaderboard() {
       <div className="space-y-8 max-w-4xl mx-auto">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Leaderboard</h1>
-          <p className="text-muted-foreground mt-1">Top traders on Campus Exchange.</p>
+          <p className="text-muted-foreground mt-1">Top traders on Predic Hsm.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-between">

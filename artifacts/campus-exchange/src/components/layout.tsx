@@ -21,7 +21,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold text-xl tracking-tight">Campus Exchange</span>
+            <span className="font-bold text-xl tracking-tight">Predic Hsm</span>
           </Link>
           <nav className="flex items-center gap-6 text-sm font-medium">
             <Link href="/" className="transition-colors hover:text-foreground/80 text-foreground">
