@@ -10,32 +10,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Menu, X, LogOut, Wallet, BarChart2, Settings, TrendingUp } from "lucide-react";
+import { ChevronDown, Menu, X, LogOut, Wallet, BarChart2, Settings, Trophy } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const NAV = [
-  { href: "/", label: "Markets", exact: true },
-  { href: "/leaderboard", label: "Leaderboard" },
-];
-
 function NavLink({ href, label, exact }: { href: string; label: string; exact?: boolean }) {
   const [location] = useLocation();
-  const active = exact ? location === href : location.startsWith(href);
+  const active = exact ? location === href : location.startsWith(href) && href !== "/";
+  const isHome = href === "/" && location === "/";
   return (
     <Link href={href}>
       <span className={cn(
-        "text-sm font-medium transition-colors",
-        active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+        "text-sm font-medium transition-colors duration-150 relative py-1",
+        (active || isHome) ? "text-gray-900" : "text-gray-500 hover:text-gray-800"
       )}>
         {label}
+        {(active || isHome) && (
+          <span className="absolute -bottom-[17px] left-0 right-0 h-0.5 bg-indigo-600 rounded-t-full" />
+        )}
       </span>
     </Link>
   );
 }
 
 export function Header() {
-  const { user, signIn } = useAuth();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [, navigate] = useLocation();
 
@@ -43,104 +42,111 @@ export function Header() {
     query: { enabled: !!user, queryKey: getGetMeQueryKey() },
   });
 
-  const handleSignIn = () => navigate("/auth");
-
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex h-14 items-center justify-between gap-4">
-        <div className="flex items-center gap-7">
+    <header className="sticky top-0 z-50 bg-white border-b border-[#E8EAF0]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex h-[60px] items-center justify-between gap-4">
+        {/* Logo + Nav */}
+        <div className="flex items-center gap-8">
           <Link href="/">
-            <div className="flex items-center gap-2 font-bold text-base">
-              <PredicLogo size={28} />
-              <span>Predic Hsm</span>
+            <div className="flex items-center gap-2.5 select-none">
+              <PredicLogo size={32} />
+              <span className="font-black text-[17px] tracking-tight text-gray-900">Predic <span className="text-indigo-600">Hsm</span></span>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-5">
-            {NAV.map((n) => (
-              <NavLink key={n.href} {...n} />
-            ))}
+          <nav className="hidden md:flex items-center gap-6">
+            <NavLink href="/" label="Markets" exact />
+            <NavLink href="/leaderboard" label="Leaderboard" />
             {user && <NavLink href="/portfolio" label="Portfolio" />}
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Right side */}
+        <div className="flex items-center gap-2.5">
           {user && me ? (
             <>
+              {/* Wallet chip */}
               <Link href="/wallet">
-                <button className="hidden sm:flex items-center gap-1.5 text-sm font-mono font-semibold border border-border rounded-lg px-3 py-1.5 hover:bg-muted transition-colors">
-                  <Wallet className="w-3.5 h-3.5 text-muted-foreground" />
+                <button className="hidden sm:flex items-center gap-2 h-9 px-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-bold hover:bg-emerald-100 transition-colors font-mono">
+                  <Wallet className="w-3.5 h-3.5" />
                   {formatCurrency(me.walletBalance)}
                 </button>
               </Link>
 
+              {/* User dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1.5 h-9 px-2.5 rounded-lg border border-border hover:bg-muted transition-colors outline-none">
-                    <div className="w-6 h-6 rounded-md bg-foreground text-background flex items-center justify-center text-xs font-bold">
+                  <button className="flex items-center gap-2 h-9 px-2.5 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors outline-none">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold select-none">
                       {me.displayName?.[0]?.toUpperCase() ?? "U"}
                     </div>
-                    <span className="hidden sm:block text-sm font-medium max-w-[100px] truncate">
+                    <span className="hidden sm:block text-sm font-semibold text-gray-700 max-w-[100px] truncate">
                       {me.displayName}
                     </span>
-                    <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                    <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52">
-                  <div className="px-3 py-2 border-b border-border mb-1">
-                    <p className="text-xs font-semibold truncate">{me.displayName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{me.email}</p>
+
+                <DropdownMenuContent align="end" className="w-56 bg-white border border-[#E8EAF0] rounded-xl p-1.5" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)" }}>
+                  <div className="px-3 py-2.5 mb-1 rounded-lg bg-slate-50">
+                    <p className="text-sm font-bold text-gray-900 truncate">{me.displayName}</p>
+                    <p className="text-xs text-slate-400 truncate mt-0.5">{me.email}</p>
                   </div>
 
                   <DropdownMenuItem asChild>
-                    <Link href="/wallet" className="cursor-pointer flex items-center gap-2">
-                      <Wallet className="w-3.5 h-3.5" /> Wallet · {formatCurrency(me.walletBalance)}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/portfolio" className="cursor-pointer flex items-center gap-2">
-                      <BarChart2 className="w-3.5 h-3.5" /> Portfolio
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/leaderboard" className="cursor-pointer flex items-center gap-2">
-                      <TrendingUp className="w-3.5 h-3.5" /> Leaderboard
+                    <Link href="/wallet" className="cursor-pointer flex items-center gap-2.5 rounded-lg px-3 py-2 hover:bg-slate-50 text-sm font-medium text-gray-700">
+                      <Wallet className="w-4 h-4 text-emerald-500" />
+                      <span>Wallet</span>
+                      <span className="ml-auto text-xs font-bold text-emerald-600 font-mono">{formatCurrency(me.walletBalance)}</span>
                     </Link>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
-
                   <DropdownMenuItem asChild>
-                    <Link href="/settings" className="cursor-pointer flex items-center gap-2">
-                      <Settings className="w-3.5 h-3.5" /> Account Settings
+                    <Link href="/portfolio" className="cursor-pointer flex items-center gap-2.5 rounded-lg px-3 py-2 hover:bg-slate-50 text-sm font-medium text-gray-700">
+                      <BarChart2 className="w-4 h-4 text-indigo-500" /> Portfolio
                     </Link>
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
+                    <Link href="/leaderboard" className="cursor-pointer flex items-center gap-2.5 rounded-lg px-3 py-2 hover:bg-slate-50 text-sm font-medium text-gray-700">
+                      <Trophy className="w-4 h-4 text-amber-500" /> Leaderboard
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator className="my-1 bg-[#E8EAF0]" />
+
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings" className="cursor-pointer flex items-center gap-2.5 rounded-lg px-3 py-2 hover:bg-slate-50 text-sm font-medium text-gray-700">
+                      <Settings className="w-4 h-4 text-slate-400" /> Account Settings
+                    </Link>
+                  </DropdownMenuItem>
+
                   <DropdownMenuItem
-                    className="text-rose-600 focus:text-rose-600 cursor-pointer flex items-center gap-2"
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 cursor-pointer text-sm font-medium text-red-600 hover:bg-red-50 focus:text-red-600"
                     onClick={async () => {
                       const { signOut: firebaseSignOut } = await import("firebase/auth");
                       const { auth } = await import("@/lib/firebase");
                       await firebaseSignOut(auth);
                     }}
                   >
-                    <LogOut className="w-3.5 h-3.5" /> Sign Out
+                    <LogOut className="w-4 h-4" /> Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           ) : user && !me ? (
-            <div className="w-8 h-8 rounded-lg border border-border animate-pulse bg-muted" />
+            <div className="w-32 h-9 rounded-xl bg-slate-100 animate-pulse" />
           ) : (
             <button
-              onClick={handleSignIn}
-              className="h-9 px-4 rounded-lg bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-opacity"
+              onClick={() => navigate("/auth")}
+              className="h-9 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors shadow-sm"
             >
               Register
             </button>
           )}
 
           <button
-            className="md:hidden p-2 text-muted-foreground hover:text-foreground"
+            className="md:hidden p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -148,8 +154,9 @@ export function Header() {
         </div>
       </div>
 
+      {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-background px-4 py-3 space-y-1">
+        <div className="md:hidden border-t border-[#E8EAF0] bg-white px-4 py-3 space-y-1">
           {[
             { href: "/", label: "Markets" },
             { href: "/leaderboard", label: "Leaderboard" },
@@ -160,10 +167,7 @@ export function Header() {
             ] : []),
           ].map((item) => (
             <Link key={item.href} href={item.href}>
-              <div
-                className="block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-muted transition-colors cursor-pointer"
-                onClick={() => setMobileOpen(false)}
-              >
+              <div className="px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg hover:bg-slate-50 cursor-pointer" onClick={() => setMobileOpen(false)}>
                 {item.label}
               </div>
             </Link>
@@ -171,7 +175,7 @@ export function Header() {
           {!user && (
             <button
               onClick={() => { navigate("/auth"); setMobileOpen(false); }}
-              className="w-full mt-2 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold"
+              className="w-full mt-2 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold"
             >
               Register
             </button>
@@ -184,18 +188,18 @@ export function Header() {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-[#F4F5F7]">
       <Header />
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
         {children}
       </main>
-      <footer className="border-t border-border mt-auto">
+      <footer className="border-t border-[#E8EAF0] bg-white mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm font-semibold text-gray-400">
             <PredicLogo size={18} />
             Predic Hsm
           </div>
-          <p className="text-xs text-muted-foreground">Virtual currency only · No real money</p>
+          <p className="text-xs text-gray-400">Virtual currency only · No real money involved</p>
         </div>
       </footer>
     </div>
