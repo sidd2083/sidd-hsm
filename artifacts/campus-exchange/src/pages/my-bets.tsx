@@ -121,7 +121,7 @@ export default function MyBets() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0 space-y-2">
-                      <p className="text-sm font-semibold leading-snug line-clamp-2">{bet.marketQuestion}</p>
+                      <p className="text-sm font-semibold leading-snug line-clamp-2">{bet.marketQuestion ?? ""}</p>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className={cn(
                           "text-xs font-bold px-2.5 py-1 rounded-full",
@@ -131,7 +131,7 @@ export default function MyBets() {
                         )}>
                           {bet.type}
                         </span>
-                        <BetStatusBadge status={bet.status} />
+                        <BetStatusBadge status={bet.status ?? "active"} />
                       </div>
                     </div>
                     <div className="text-right shrink-0 space-y-1">

@@ -54,7 +54,7 @@ function StatCard({ icon: Icon, label, value, color }: {
   );
 }
 
-function BetRow({ bet }: { bet: { id: string; marketQuestion: string | null; type: string; amountPaid: number; status: string; payout?: number | null } }) {
+function BetRow({ bet }: { bet: { id: string; marketQuestion?: string | null; type: string; amountPaid: number; status: string; payout?: number | null } }) {
   const isWon = bet.status === "won";
   const isLost = bet.status === "lost";
   const profit = (bet.payout ?? 0) - bet.amountPaid;
@@ -296,7 +296,7 @@ export default function Profile() {
             </div>
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
-              {bets.map((bet) => <BetRow key={bet.id} bet={bet} />)}
+              {bets.map((bet) => <BetRow key={bet.id} bet={{ ...bet, status: bet.status ?? "active", marketQuestion: bet.marketQuestion ?? null }} />)}
             </div>
           )}
         </div>

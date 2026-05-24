@@ -1,6 +1,6 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { AuthProvider } from "@/lib/auth-context";
@@ -8,24 +8,37 @@ import { AppWrapper } from "@/components/app-wrapper";
 
 import Home from "@/pages/home";
 import Leaderboard from "@/pages/leaderboard";
-import MyBets from "@/pages/my-bets";
+import MarketDetail from "@/pages/market-detail";
+import Portfolio from "@/pages/portfolio";
+import Wallet from "@/pages/wallet";
+import Settings from "@/pages/settings";
 import Admin from "@/pages/admin";
-import About from "@/pages/about";
+import Auth from "@/pages/auth";
 import Onboarding from "@/pages/onboarding";
-import Profile from "@/pages/profile";
+import About from "@/pages/about";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      refetchOnWindowFocus: true,
+    },
+  },
+});
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/market/:id" component={MarketDetail} />
       <Route path="/leaderboard" component={Leaderboard} />
-      <Route path="/my-bets" component={MyBets} />
+      <Route path="/portfolio" component={Portfolio} />
+      <Route path="/wallet" component={Wallet} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/auth" component={Auth} />
+      <Route path="/onboarding" component={Onboarding} />
       <Route path="/admin" component={Admin} />
       <Route path="/about" component={About} />
-      <Route path="/onboarding" component={Onboarding} />
-      <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -41,7 +54,7 @@ function App() {
               <Router />
             </WouterRouter>
           </AppWrapper>
-          <Toaster />
+          <Toaster richColors position="top-right" />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
