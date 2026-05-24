@@ -13,8 +13,8 @@ router.post("/bets", requireAuth, async (req: AuthRequest, res) => {
     amountPaid: number;
   };
 
-  if (!marketId || !type || !amountPaid || amountPaid <= 0) {
-    res.status(400).json({ error: "Invalid bet parameters" });
+  if (!marketId || !type || !amountPaid || amountPaid < 100) {
+    res.status(400).json({ error: "Minimum bet is Rs. 100" });
     return;
   }
 

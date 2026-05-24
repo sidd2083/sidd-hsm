@@ -3,20 +3,16 @@ import { getMarketStats, formatCurrency } from "@/lib/market-math";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
-const CATEGORY_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
-  sports:   { bg: "bg-orange-50",  text: "text-orange-600",  dot: "bg-orange-400" },
-  college:  { bg: "bg-blue-50",    text: "text-blue-600",    dot: "bg-blue-400" },
-  social:   { bg: "bg-pink-50",    text: "text-pink-600",    dot: "bg-pink-400" },
-  national: { bg: "bg-emerald-50", text: "text-emerald-600", dot: "bg-emerald-400" },
+const CATEGORY_STYLES: Record<string, { bg: string; text: string }> = {
+  sports:   { bg: "bg-orange-50",  text: "text-orange-600" },
+  college:  { bg: "bg-blue-50",    text: "text-blue-600" },
+  social:   { bg: "bg-pink-50",    text: "text-pink-600" },
+  national: { bg: "bg-emerald-50", text: "text-emerald-600" },
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
-  sports: "Sports", college: "College", social: "Social", national: "National",
-};
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  sports: "⚽", college: "🏫", social: "📱", national: "🌐",
-};
+function categoryStyle(cat: string) {
+  return CATEGORY_STYLES[cat] ?? { bg: "bg-slate-50", text: "text-slate-600" };
+}
 
 export function MarketCard({ market }: { market: Market }) {
   const { totalPool, yesMultiplier, noMultiplier, yesPercentage } = getMarketStats(
@@ -27,38 +23,34 @@ export function MarketCard({ market }: { market: Market }) {
   const noPercentage = 100 - yesPercentage;
   const isLocked = market.status !== "active" || Date.now() >= market.lockTimestamp;
   const isResolved = market.status === "resolved";
-  const cat = CATEGORY_COLORS[market.category] ?? { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-400" };
-  const isYesWinning = yesPercentage > noPercentage;
+  const cat = categoryStyle(market.category);
+  const catLabel = market.category.charAt(0).toUpperCase() + market.category.slice(1);
 
   return (
     <Link href={`/market/${market.id}`}>
       <div className="group bg-white rounded-2xl card-shadow card-shadow-hover cursor-pointer border border-[#E8EAF0] overflow-hidden h-full flex flex-col">
-        {/* Top bar accent */}
-        {!isResolved && !isLocked && (
-          <div className="h-0.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-80" />
-        )}
-        {isResolved && (
-          <div className="h-0.5 w-full bg-gradient-to-r from-emerald-400 to-teal-500" />
-        )}
-        {isLocked && !isResolved && (
-          <div className="h-0.5 w-full bg-slate-200" />
-        )}
+        {/* Status accent bar */}
+        {isResolved
+          ? <div className="h-0.5 bg-emerald-400" />
+          : isLocked
+          ? <div className="h-0.5 bg-slate-200" />
+          : <div className="h-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
+        }
 
         <div className="p-5 flex flex-col gap-4 flex-1">
-          {/* Header row */}
+          {/* Category + Status */}
           <div className="flex items-center justify-between gap-2">
-            <span className={cn("inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full", cat.bg, cat.text)}>
-              <span className={cn("w-1.5 h-1.5 rounded-full", cat.dot)} />
-              {CATEGORY_EMOJI[market.category]} {CATEGORY_LABELS[market.category] ?? market.category}
+            <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full", cat.bg, cat.text)}>
+              {catLabel}
             </span>
 
             {isResolved ? (
               <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                ✓ Resolved
+                Resolved
               </span>
             ) : isLocked ? (
               <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
-                🔒 Locked
+                Locked
               </span>
             ) : (
               <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 flex items-center gap-1">
@@ -73,7 +65,7 @@ export function MarketCard({ market }: { market: Market }) {
             {market.question}
           </p>
 
-          {/* Probability display */}
+          {/* Probability */}
           {isResolved && market.winningOutcome ? (
             <div className={cn(
               "rounded-xl px-4 py-3 text-center",
@@ -86,7 +78,6 @@ export function MarketCard({ market }: { market: Market }) {
             </div>
           ) : (
             <div className="space-y-3">
-              {/* Big probability numbers */}
               <div className="flex items-end justify-between">
                 <div>
                   <span className="text-3xl font-black text-emerald-600">{yesPercentage.toFixed(0)}%</span>
@@ -98,21 +89,19 @@ export function MarketCard({ market }: { market: Market }) {
                 </div>
               </div>
 
-              {/* Progress bar */}
               <div className="relative h-2.5 w-full bg-red-100 rounded-full overflow-hidden">
                 <div
-                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-700 ease-out"
+                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-700"
                   style={{ width: `${yesPercentage}%` }}
                 />
               </div>
 
-              {/* Multipliers + volume */}
               <div className="flex items-center justify-between pt-0.5">
-                <div className="flex items-center gap-3 text-xs font-medium">
-                  <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-mono font-semibold border border-emerald-100">
+                <div className="flex items-center gap-2 text-xs font-semibold">
+                  <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-mono border border-emerald-100">
                     {yesMultiplier.toFixed(2)}x
                   </span>
-                  <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded-md font-mono font-semibold border border-red-100">
+                  <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded-md font-mono border border-red-100">
                     {noMultiplier.toFixed(2)}x
                   </span>
                 </div>
@@ -122,12 +111,11 @@ export function MarketCard({ market }: { market: Market }) {
           )}
         </div>
 
-        {/* Bottom CTA */}
         {!isResolved && !isLocked && (
           <div className="px-5 py-3 bg-slate-50 border-t border-[#E8EAF0] flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-medium">Click to trade</span>
+            <span className="text-xs text-slate-400 font-medium">Min. Rs. 100</span>
             <span className="text-xs font-semibold text-indigo-600 group-hover:text-indigo-700">
-              View market →
+              Trade now →
             </span>
           </div>
         )}

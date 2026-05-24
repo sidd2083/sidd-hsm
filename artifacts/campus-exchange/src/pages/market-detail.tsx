@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, Lock, CheckCircle, TrendingUp, Users, Clock, Wallet } from "lucide-react";
 import { Link } from "wouter";
 
-const QUICK = [500, 1000, 5000, 10000];
+const QUICK = [100, 500, 1000, 5000];
 
 function BetPanel({ marketId, isLocked, yesPool, noPool }: {
   marketId: string;
