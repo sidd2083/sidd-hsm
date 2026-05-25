@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm --filter @workspace/campus-exchange build",
+  "outputDirectory": "artifacts/campus-exchange/dist/public",
+  "installCommand": "pnpm install",
+  "framework": null
+}
