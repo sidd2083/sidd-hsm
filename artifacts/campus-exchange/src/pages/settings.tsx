@@ -4,7 +4,8 @@ import { useGetMe, useUpdateProfile, getGetMeQueryKey } from "@workspace/api-cli
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
-import { LogOut } from "lucide-react";
+import { LogOut, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const STREAMS = [
   "Class 11 - Science",
@@ -20,7 +21,7 @@ export default function Settings() {
   const { data: me, isLoading } = useGetMe({ query: { queryKey: getGetMeQueryKey() } });
   const updateProfile = useUpdateProfile();
 
-  const [form, setForm] = useState({ displayName: "", academicStream: "", section: "" });
+  const [form, setForm] = useState({ displayName: "", academicStream: "" });
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -28,7 +29,6 @@ export default function Settings() {
       setForm({
         displayName: me.displayName ?? "",
         academicStream: me.academicStream ?? "",
-        section: me.section ?? "",
       });
     }
   }, [me]);
@@ -36,101 +36,111 @@ export default function Settings() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfile.mutate(
-      { data: { displayName: form.displayName, academicStream: form.academicStream as never, section: form.section } },
+      { data: { displayName: form.displayName, academicStream: form.academicStream as never, section: "" } },
       {
         onSuccess: () => {
-          toast.success("Profile updated!");
+          toast.success("Profile saved successfully");
           queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
           setSaved(true);
-          setTimeout(() => setSaved(false), 2000);
+          setTimeout(() => setSaved(false), 3000);
         },
-        onError: () => toast.error("Failed to update profile"),
+        onError: () => toast.error("Failed to save profile"),
       }
     );
   };
 
   return (
     <Layout>
-      <div className="max-w-xl mx-auto space-y-6">
-        <div className="border-b border-border pb-4">
-          <h1 className="text-2xl font-bold">Account Settings</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage your profile information</p>
+      <div className="max-w-lg mx-auto space-y-5 py-2">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Manage your Predic HSM profile</p>
         </div>
 
-        {isLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-12 bg-muted rounded-lg animate-pulse" />
-            ))}
+        <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden card-shadow">
+          <div className="px-5 py-4 border-b border-gray-50">
+            <p className="text-sm font-semibold text-gray-700">Profile Information</p>
           </div>
-        ) : (
-          <form onSubmit={handleSave} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Full Name</label>
-              <input
-                value={form.displayName}
-                onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
-                className="w-full h-11 px-3 rounded-lg border border-border text-sm outline-none focus:border-foreground transition-colors bg-background"
-                placeholder="Your name"
-                required
-              />
-            </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Academic Stream</label>
-              <select
-                value={form.academicStream}
-                onChange={(e) => setForm((f) => ({ ...f, academicStream: e.target.value }))}
-                className="w-full h-11 px-3 rounded-lg border border-border text-sm outline-none focus:border-foreground transition-colors bg-background appearance-none"
+          {isLoading ? (
+            <div className="p-5 space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-10 bg-gray-100 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <form onSubmit={handleSave} className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-gray-600">Display Name</label>
+                <input
+                  value={form.displayName}
+                  onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
+                  className="w-full h-10 px-3.5 rounded-lg border border-gray-200 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/15 transition-all bg-white"
+                  placeholder="Your name"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-gray-600">Academic Stream</label>
+                <select
+                  value={form.academicStream}
+                  onChange={(e) => setForm((f) => ({ ...f, academicStream: e.target.value }))}
+                  className="w-full h-10 px-3.5 rounded-lg border border-gray-200 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/15 transition-all bg-white appearance-none"
+                >
+                  <option value="">Select your stream</option>
+                  {STREAMS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-gray-600">Email Address</label>
+                <input
+                  value={me?.email ?? ""}
+                  disabled
+                  className="w-full h-10 px-3.5 rounded-lg border border-gray-100 text-sm bg-gray-50 text-gray-400 cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-400">Linked to your Google account — cannot be changed.</p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={updateProfile.isPending}
+                className={cn(
+                  "w-full h-10 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2",
+                  saved
+                    ? "bg-emerald-600 text-white"
+                    : "bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-60"
+                )}
               >
-                <option value="">Select stream</option>
-                {STREAMS.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
+                {updateProfile.isPending ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : saved ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Saved!
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </button>
+            </form>
+          )}
+        </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Section</label>
-              <input
-                value={form.section}
-                onChange={(e) => setForm((f) => ({ ...f, section: e.target.value }))}
-                className="w-full h-11 px-3 rounded-lg border border-border text-sm outline-none focus:border-foreground transition-colors bg-background uppercase"
-                placeholder="e.g. A"
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Email</label>
-              <input
-                value={me?.email ?? ""}
-                disabled
-                className="w-full h-11 px-3 rounded-lg border border-border text-sm bg-muted text-muted-foreground cursor-not-allowed"
-              />
-              <p className="text-xs text-muted-foreground">Email is tied to your Google account and cannot be changed.</p>
-            </div>
-
-            <button
-              type="submit"
-              disabled={updateProfile.isPending}
-              className="w-full h-11 rounded-lg bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
-            >
-              {updateProfile.isPending ? "Saving..." : saved ? "Saved!" : "Save Changes"}
-            </button>
-          </form>
-        )}
-
-        <div className="pt-4 border-t border-border">
-          <div className="space-y-1.5">
-            <h3 className="text-sm font-semibold">Danger Zone</h3>
-            <p className="text-xs text-muted-foreground">Sign out of your account</p>
-          </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 card-shadow">
+          <p className="text-sm font-semibold text-gray-700 mb-0.5">Sign Out</p>
+          <p className="text-xs text-gray-400 mb-4">You will be signed out of your Predic HSM account.</p>
           <button
             onClick={signOut}
-            className="mt-3 flex items-center gap-2 text-sm font-medium text-rose-600 hover:text-rose-700 transition-colors"
+            className="flex items-center gap-2 h-9 px-4 rounded-lg border border-red-100 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
           >
-            <LogOut className="w-4 h-4" /> Sign Out
+            <LogOut className="w-3.5 h-3.5" /> Sign Out
           </button>
         </div>
       </div>

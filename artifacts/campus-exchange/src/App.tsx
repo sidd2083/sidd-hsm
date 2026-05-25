@@ -16,12 +16,16 @@ import Admin from "@/pages/admin";
 import Auth from "@/pages/auth";
 import Onboarding from "@/pages/onboarding";
 import About from "@/pages/about";
+import Terms from "@/pages/terms";
+import Privacy from "@/pages/privacy";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,
-      refetchOnWindowFocus: true,
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
     },
   },
 });
@@ -39,6 +43,8 @@ function Router() {
       <Route path="/onboarding" component={Onboarding} />
       <Route path="/admin" component={Admin} />
       <Route path="/about" component={About} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/privacy" component={Privacy} />
       <Route component={NotFound} />
     </Switch>
   );
