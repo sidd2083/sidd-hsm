@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm --filter @workspace/campus-exchange run build",
+  "outputDirectory": "artifacts/campus-exchange/dist/public",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
