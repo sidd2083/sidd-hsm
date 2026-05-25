@@ -25,18 +25,28 @@ router.get("/markets", optionalAuth, async (req: AuthRequest, res) => {
     query = query.orderBy("createdAt", "desc");
   }
 
-  const snapshot = await query.get();
-  let markets = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Array<Record<string, unknown>>;
+  try {
+    const snapshot = await query.get();
+    let markets = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Array<Record<string, unknown>>;
 
-  // Client-side sort when filters are applied
-  if (needsClientSort) {
-    markets = markets.sort((a, b) => ((b["createdAt"] as number) ?? 0) - ((a["createdAt"] as number) ?? 0));
+    // Client-side sort when filters are applied
+    if (needsClientSort) {
+      markets = markets.sort((a, b) => ((b["createdAt"] as number) ?? 0) - ((a["createdAt"] as number) ?? 0));
+    }
+
+    res.json(markets);
+  } catch (err: unknown) {
+    const code = (err as { code?: number })?.code;
+    if (code === 16) {
+      // UNAUTHENTICATED — service account lacks Firestore IAM permissions
+      res.status(503).json({ error: "Database unavailable: service account lacks Firestore permissions. Grant the 'Cloud Datastore User' role in GCP IAM." });
+    } else {
+      throw err;
+    }
   }
-
-  res.json(markets);
 });
 
 router.get("/markets/:id", optionalAuth, async (req: AuthRequest, res) => {

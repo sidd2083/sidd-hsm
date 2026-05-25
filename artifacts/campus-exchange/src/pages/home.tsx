@@ -22,18 +22,20 @@ export default function Home() {
 
   useEffect(() => { setCategory(urlCategory); }, [urlCategory]);
 
-  const { data: markets, isLoading } = useListMarkets(
+  const { data: rawMarkets, isLoading, isError } = useListMarkets(
     category === "all" ? undefined : { category }
   );
 
-  const filtered = markets?.filter(m =>
+  const markets = Array.isArray(rawMarkets) ? rawMarkets : [];
+
+  const filtered = markets.filter(m =>
     searchQuery.trim() === "" ||
     m.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const activeCount   = markets?.filter((m) => m.status === "active").length ?? 0;
-  const resolvedCount = markets?.filter((m) => m.status === "resolved").length ?? 0;
+  const activeCount   = markets.filter((m) => m.status === "active").length;
+  const resolvedCount = markets.filter((m) => m.status === "resolved").length;
 
   return (
     <Layout>
@@ -88,7 +90,13 @@ export default function Home() {
               <div key={i} className="h-64 rounded-2xl bg-white shimmer" />
             ))}
           </div>
-        ) : filtered?.length === 0 ? (
+        ) : isError ? (
+          <div className="text-center py-20 bg-white rounded-2xl border border-[#E8EAF0] card-shadow">
+            <p className="text-2xl mb-2">⚠️</p>
+            <p className="font-semibold text-gray-700">Markets unavailable right now</p>
+            <p className="text-sm text-gray-400 mt-1 max-w-xs mx-auto">The database is being set up. Check back soon or contact the admin.</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-24 bg-white rounded-2xl border border-[#E8EAF0] card-shadow">
             <p className="text-gray-400 font-semibold">No markets found.</p>
             {searchQuery && (
