@@ -34,11 +34,10 @@ externalPort = 3000
 [userenv]
 
 [userenv.shared]
-VITE_FIREBASE_API_KEY = "AIzaSyDjkEbTCQiAtDtX58TCXVb7WdphVrrT4FU"
-VITE_FIREBASE_AUTH_DOMAIN = "studenthub-6bcc5.firebaseapp.com"
-VITE_FIREBASE_PROJECT_ID = "studenthub-6bcc5"
-VITE_FIREBASE_STORAGE_BUCKET = "studenthub-6bcc5.firebasestorage.app"
-VITE_FIREBASE_MESSAGING_SENDER_ID = "789283396930"
-VITE_FIREBASE_APP_ID = "1:789283396930:web:4a285beec182564104bcdb"
-VITE_FIREBASE_MEASUREMENT_ID = "G-D4PFVY6F18"
-FIREBASE_SERVICE_ACCOUNT = '{"type":"service_account","project_id":"studenthub-6bcc5","private_key_id":"3dcf5cb2e2eb1bb7ac452353d7e90d834a1c61b9","private_key":"-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7yf/IviRx6yY+\n1Pp9JVcOoOHRvcyUk8lHGj+zPomETw+m2LAOD5x6X+WPUhxq2VXOTX8fNv8DYJed\ntKBA05scfUTSMTmnhvapsmnFYZZJfpG1V5EVoww7s9wP+PXK0YbRtwLu4Oq/6e0I\npruXc7oDDxMRcCbD2geFpxcbeiWYRhJLlvyb695hWkAVKtRQ+eDJrkF6Zl9lQx9y\nqnNztOPuWbNE3IT5wA805iKGminNRJOZaBsAreaPN29fzWTV3z33UDYJeWy8bZl6\nMY/K/2SAJr17vXdOC3VGskpa8EgfAB28VHeltbiux3Jpd+su7hHOh3xpaC45WQ6D\nzjHrUsv/AgMBAAECggEAEyadBsBZYCK+gj7fEr8pmyzOCsFD6U0PBEjJgUKZ7JvR\neU702WI/L32zIAQcMMtcRE9D7Q+DPzltDOC8TRAna+bci2EIw6xwYEr5HW9/z5vw\nSSGWgrHfkAEeKqTVkCsBCEcVLf5TAmJdUXoLfH0JVcGGTMt2sJd+F+O76AnzZo1l\n38kPVtdP6XNtOuox1d+JHpwWVG/Gf2X0CulrSSybEmeqJ3Q9iw7CcQ3EYRvYWhgw\n39zGVwszp7Fo3TFrXVHJAGImWSucLiowB1a5V5TrFkmgX41ReQI04KbuPs8FADkJ\nx57h5F/hswaj6/dvjRID9S0K0C1eSU2XNv/zJDw3CQKBgQDzFDXchHWScTv+xgo3\npJ4+Ouz9XgploEvWxnki0LUGTMgLcpxN7P7dEB1eePZxG+b7jEfmuiXEIKV7t1rZ\nYhbhhq9DEk5ubwohh/MFkyn3sKq6A5f3JHUbbSbNmH0ZfDubb3XEDEIUqY0FX2vX\nS7amX9CoGdu0/NVm/t31nhE+6QKBgQDFxWkWcWlcDbax+/lNocC8nhF+nj3fLiYN\n8JDCWwghPGuKoTA5OMDom8jYUgplGSWOtAbSDb7cvj0M5VujHVOP5NqusmB4cOGw\nidHivpMdl2Z2OBiXa08SqyXVmEl6KR1pKs/lmDJF+GI0tc333lSMWMkZtTfEa05z\nTvZ5PDdypwKBgEkjcJ1cQaABcCLVZaeeYXqp8jq9+/TeCVOjPjmKgJ1Xpu1C2+La\nh0jum1ecn9IiqhpP+CZlJg3gIMqbvbsgt2++Pae5r12tDWhPZoDr6bm8L3JuuF/F\nWXMaIY3E7wcnCSxYmh+V7KAY7/SI5ILQJjHjLH4X4bKQTImD8DcCC4BZAoGBAKI9\nn0cFBLy6l0yNe+gesOFK/ukTYYhr8FXxKp/2U8YILeTM9KWMlFx+KBalvtdO+MuH\njizVj+TAv46LvVAjp8BcqrUzqgZD/DF57k+HrWJSKIEE5c+Z/YVAF8qQon5vqivz\nLheYcm2KJO4+0tfrcQqtb1QCoNwmd3YKqhGsv4PzAoGAW6FgyXfFSUrxPXAJhnxo\nCtLn5NVkxvZbZjXTMBNxgLXx2KbPeCb9r4fJbjB+HPQI5bwgrPmEKBjGslGPDmvf\n+9uxh/x5Muam9bbpSOqg/FN0wj+N35AoX6x5iH+4eamrfGgMgSF1BBV/ugJNw6wB\nLm3ay2VN9BgDCwxXEGac5qA=\n-----END PRIVATE KEY-----\n","client_email":"firebase-adminsdk-fbsvc@studenthub-6bcc5.iam.gserviceaccount.com","client_id":"107690414236029146105","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40studenthub-6bcc5.iam.gserviceaccount.com","universe_domain":"googleapis.com"}'
+VITE_FIREBASE_API_KEY = "AIzaSyCrO_4GVc6uGZBF4v_g2HHrnA46e9ND7Xg"
+VITE_FIREBASE_AUTH_DOMAIN = "predichsm.firebaseapp.com"
+VITE_FIREBASE_PROJECT_ID = "predichsm"
+VITE_FIREBASE_STORAGE_BUCKET = "predichsm.firebasestorage.app"
+VITE_FIREBASE_MESSAGING_SENDER_ID = "669609220526"
+VITE_FIREBASE_APP_ID = "1:669609220526:web:972c28fbac8ac69acdd03f"
+VITE_FIREBASE_MEASUREMENT_ID = "G-WH2NV7ZGJB"
