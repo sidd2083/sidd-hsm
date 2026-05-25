@@ -37,7 +37,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex bg-slate-50">
-      {/* Left panel */}
+      {/* Left branding panel */}
       <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 bg-slate-900 p-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950" />
         <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-indigo-500/10" />
@@ -63,9 +63,9 @@ export default function Auth() {
           </p>
         </div>
 
-        <div className="relative z-10 space-y-0 divide-y divide-slate-800">
+        <div className="relative z-10 divide-y divide-slate-800">
           {[
-            { label: "Starting balance", value: "₹10,000" },
+            { label: "Starting balance", value: "₹1,00,000" },
             { label: "Daily login bonus", value: "₹100" },
             { label: "Real money involved", value: "None" },
           ].map((item) => (
@@ -77,7 +77,7 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* Right panel */}
+      {/* Right sign-in panel */}
       <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 px-6 py-12">
         <div className="w-full max-w-[360px]">
 
@@ -118,7 +118,7 @@ export default function Auth() {
 
             <div className="mt-6 pt-6 border-t border-gray-100 grid grid-cols-3 gap-3 text-center">
               {[
-                { num: "₹10K", sub: "Start balance" },
+                { num: "₹1L", sub: "Start balance" },
                 { num: "₹100", sub: "Daily bonus" },
                 { num: "0%", sub: "Real money" },
               ].map((s) => (

@@ -22,22 +22,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(firebaseUser);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
   const signIn = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      console.error("Sign in failed", error);
+    const result = await signInWithPopup(auth, googleProvider);
+    // If brand new Google account, mark that onboarding is needed
+    if (result.additionalUserInfo?.isNewUser) {
+      localStorage.setItem(`needs_onboarding_${result.user.uid}`, "true");
     }
   };
 
   const signOut = async () => {
     try {
       await firebaseSignOut(auth);
-      queryClient.clear(); // Clear all queries on sign out
+      queryClient.clear();
     } catch (error) {
       console.error("Sign out failed", error);
     }

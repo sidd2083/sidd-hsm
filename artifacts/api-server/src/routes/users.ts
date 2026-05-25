@@ -5,7 +5,7 @@ import { requireAuth, type AuthRequest } from "../middlewares/auth";
 const router = Router();
 const db = () => admin.firestore();
 
-const STARTING_BALANCE = 10000;
+const STARTING_BALANCE = 100000;
 const DAILY_BONUS = 100;
 
 router.get("/users/me", requireAuth, async (req: AuthRequest, res) => {
