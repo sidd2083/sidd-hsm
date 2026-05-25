@@ -36,65 +36,71 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left panel — branding */}
-      <div className="hidden lg:flex flex-col justify-between w-[400px] shrink-0 bg-indigo-600 p-10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-800" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-white/5 translate-x-1/3 translate-y-1/3" />
-        <div className="absolute top-20 -left-10 w-48 h-48 rounded-full bg-white/5" />
+    <div className="min-h-screen flex bg-slate-50">
+      {/* Left panel */}
+      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 bg-slate-900 p-12 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-indigo-500/10" />
+        <div className="absolute top-32 -left-16 w-64 h-64 rounded-full bg-indigo-500/5" />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-2.5 mb-12">
-            <div className="w-8 h-8 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-white font-bold text-sm">P</div>
-            <span className="text-white font-bold tracking-tight">Predic HSM</span>
+          <div className="flex items-center gap-3 mb-14">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center">
+              <span className="text-white font-black text-base">P</span>
+            </div>
+            <span className="text-white font-bold text-[16px] tracking-tight">Predic HSM</span>
           </div>
 
-          <h1 className="text-3xl font-bold text-white leading-tight mb-4">
-            Predict.<br />Compete.<br />Win.
-          </h1>
-          <p className="text-indigo-200 text-sm leading-relaxed max-w-[260px]">
-            Trade virtual currency on college events, sports, and national outcomes. Pure strategy, zero real money.
+          <div className="mb-8">
+            <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-4">Campus Prediction Markets</p>
+            <h1 className="text-4xl font-black text-white leading-tight">
+              Predict.<br />Compete.<br />
+              <span className="text-indigo-400">Win.</span>
+            </h1>
+          </div>
+          <p className="text-slate-400 text-[14px] leading-relaxed max-w-[280px]">
+            Trade virtual currency on college events, sports, and national outcomes. Pure strategy — zero real money.
           </p>
         </div>
 
-        <div className="relative z-10 space-y-3">
+        <div className="relative z-10 space-y-0 divide-y divide-slate-800">
           {[
-            { label: "Starting balance", value: "₹1,00,000" },
+            { label: "Starting balance", value: "₹10,000" },
             { label: "Daily login bonus", value: "₹100" },
-            { label: "Real money involved", value: "Zero" },
+            { label: "Real money involved", value: "None" },
           ].map((item) => (
-            <div key={item.label} className="flex items-center justify-between border-b border-white/10 pb-3 last:border-0 last:pb-0">
-              <span className="text-indigo-300 text-sm">{item.label}</span>
-              <span className="text-white font-semibold text-sm">{item.value}</span>
+            <div key={item.label} className="flex items-center justify-between py-4">
+              <span className="text-slate-400 text-[14px]">{item.label}</span>
+              <span className="text-white font-bold text-[14px]">{item.value}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Right panel — sign in */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#F7F8FA] px-6 py-12">
-        <div className="w-full max-w-[340px]">
+      {/* Right panel */}
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 px-6 py-12">
+        <div className="w-full max-w-[360px]">
 
           {/* Mobile logo */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 mb-3">
-              <span className="text-white font-bold text-xl">P</span>
+          <div className="lg:hidden text-center mb-10">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-900 mb-4">
+              <span className="text-white font-black text-2xl">P</span>
             </div>
-            <h1 className="text-xl font-bold text-gray-900">Predic HSM</h1>
-            <p className="text-sm text-gray-500 mt-1">College prediction markets</p>
+            <h1 className="text-2xl font-black text-gray-900">Predic HSM</h1>
+            <p className="text-[14px] text-gray-500 mt-1">Campus prediction markets</p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 p-7" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-gray-900">Sign in to continue</h2>
-              <p className="text-sm text-gray-400 mt-0.5">Use your college Google account</p>
+          <div className="bg-white rounded-2xl border border-gray-200 p-8" style={{ boxShadow: "0 4px 32px rgba(0,0,0,0.07)" }}>
+            <div className="mb-7">
+              <h2 className="text-[20px] font-black text-gray-900">Sign in to continue</h2>
+              <p className="text-[14px] text-gray-400 mt-1">Use your college Google account</p>
             </div>
 
             <button
               onClick={handleSignIn}
               disabled={signingIn}
-              className="w-full flex items-center justify-center gap-2.5 h-11 px-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-sm font-semibold text-gray-700 transition-all disabled:opacity-60"
-              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+              className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-[14px] font-semibold text-gray-700 transition-all disabled:opacity-60 active:scale-[0.98]"
+              style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
             >
               {signingIn ? (
                 <div className="w-4 h-4 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin" />
@@ -105,30 +111,30 @@ export default function Auth() {
             </button>
 
             {error && (
-              <div className="mt-3 text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 text-center border border-red-100">
+              <div className="mt-3 text-[13px] text-red-600 bg-red-50 rounded-xl px-4 py-3 text-center border border-red-100">
                 {error}
               </div>
             )}
 
-            <div className="mt-5 pt-5 border-t border-gray-50 grid grid-cols-3 gap-2 text-center">
+            <div className="mt-6 pt-6 border-t border-gray-100 grid grid-cols-3 gap-3 text-center">
               {[
-                { num: "₹1L", sub: "Start balance" },
+                { num: "₹10K", sub: "Start balance" },
                 { num: "₹100", sub: "Daily bonus" },
                 { num: "0%", sub: "Real money" },
               ].map((s) => (
-                <div key={s.sub}>
-                  <p className="text-sm font-bold text-indigo-600">{s.num}</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{s.sub}</p>
+                <div key={s.sub} className="bg-slate-50 rounded-xl py-3 px-2">
+                  <p className="text-[15px] font-black text-indigo-600">{s.num}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5 font-medium">{s.sub}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <p className="text-center text-xs text-gray-400 mt-5 leading-relaxed px-2">
+          <p className="text-center text-[12px] text-gray-400 mt-5 leading-relaxed px-2">
             By signing in you agree to our{" "}
-            <Link href="/terms"><span className="text-indigo-500 hover:underline cursor-pointer">Terms</span></Link>
+            <Link href="/terms"><span className="text-indigo-500 hover:underline cursor-pointer font-medium">Terms</span></Link>
             {" & "}
-            <Link href="/privacy"><span className="text-indigo-500 hover:underline cursor-pointer">Privacy Policy</span></Link>.
+            <Link href="/privacy"><span className="text-indigo-500 hover:underline cursor-pointer font-medium">Privacy Policy</span></Link>.
             <br />Virtual currency only — no real money involved.
           </p>
         </div>
