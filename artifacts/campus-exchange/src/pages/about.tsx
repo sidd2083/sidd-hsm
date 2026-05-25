@@ -5,53 +5,53 @@ import { TrendingUp, Shield, Zap, Users, BookOpen, Trophy, AlertTriangle } from 
 export default function About() {
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto space-y-5 py-2">
-        <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden card-shadow">
-          <div className="h-1 bg-indigo-600" />
-          <div className="p-6 sm:p-8">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">About Predic HSM</h1>
-                <p className="text-xs text-indigo-600 font-medium mt-0.5">Hetauda School of Management</p>
-              </div>
+      <div className="max-w-3xl mx-auto space-y-4 py-2">
+
+        {/* Hero */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 card-shadow">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Predic HSM is a campus prediction market built exclusively for students of{" "}
-              <strong className="text-gray-800">Hetauda School of Management (HSM)</strong>. It is a fun, educational project where you predict outcomes of real campus and national events using virtual currency. No real money — pure skill and instinct.
-            </p>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">About Predic HSM</h1>
+              <p className="text-xs text-indigo-600 font-semibold mt-0.5 uppercase tracking-wide">HSM College · Hetauda</p>
+            </div>
           </div>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Predic HSM is a prediction market built exclusively for students of <strong className="text-gray-800">HSM college</strong>. It is a fun, educational project where you predict outcomes of real college and national events using virtual currency. No real money — pure skill and instinct.
+          </p>
         </div>
 
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5">
+        {/* Admin note */}
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <div className="space-y-1.5">
-              <p className="text-sm font-semibold text-amber-800">Note to School Administration</p>
+              <p className="text-sm font-semibold text-amber-800">Note to College Administration</p>
               <p className="text-[13px] text-amber-700 leading-relaxed">
-                Predic HSM is an independent student project and is not affiliated with the school administration. It does not involve real money and does not promote betting or gambling in any form. This is purely an educational prediction game. If school administration has any concerns or objections about this platform,{" "}
-                <strong>please contact us and we will immediately and completely remove this site from the internet</strong>. We have full respect for HSM and its policies.
+                Predic HSM is an independent student project — not affiliated with or endorsed by the college administration. It does not involve real money and does not promote betting or gambling in any form. This is a purely educational prediction game. If the administration has any concerns,{" "}
+                <strong>please contact us and we will immediately remove this site</strong>. We have full respect for HSM and its policies.
               </p>
             </div>
           </div>
         </div>
 
+        {/* Features grid */}
         <div>
           <h2 className="text-base font-bold text-gray-900 mb-3">What You Can Do</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {[
-              { icon: Zap, color: "text-amber-600 bg-amber-50", title: "Start with ₹1,00,000", desc: "Every account gets ₹1 lakh in virtual currency. No deposit or credit card needed." },
-              { icon: Trophy, color: "text-indigo-600 bg-indigo-50", title: "Climb the Leaderboard", desc: "Compete with classmates. The sharpest predictor at HSM earns bragging rights." },
-              { icon: BookOpen, color: "text-emerald-600 bg-emerald-50", title: "Campus-Relevant Markets", desc: "Football results, college events, national news — markets that matter to you." },
-              { icon: Shield, color: "text-rose-600 bg-rose-50", title: "100% Safe & Virtual", desc: "No real money at stake, ever. Completely safe and risk-free entertainment." },
-              { icon: Users, color: "text-blue-600 bg-blue-50", title: "Daily Bonus", desc: "Claim ₹100 every day just for logging in. Stay active and grow your portfolio." },
-              { icon: TrendingUp, color: "text-purple-600 bg-purple-50", title: "Portfolio Tracking", desc: "Track your P&L, win rate, and history. See exactly how sharp your instincts are." },
+              { icon: Zap, color: "text-amber-600", bg: "bg-amber-50", title: "Start with ₹1,00,000", desc: "Every account gets ₹1 lakh in virtual currency. No deposit or credit card needed." },
+              { icon: Trophy, color: "text-indigo-600", bg: "bg-indigo-50", title: "Climb the Leaderboard", desc: "Compete with classmates. The sharpest predictor at HSM earns bragging rights." },
+              { icon: BookOpen, color: "text-emerald-600", bg: "bg-emerald-50", title: "College-Relevant Markets", desc: "Football results, college events, national news — markets that matter to you." },
+              { icon: Shield, color: "text-rose-600", bg: "bg-rose-50", title: "100% Safe & Virtual", desc: "No real money at stake, ever. Completely safe and risk-free entertainment." },
+              { icon: Users, color: "text-blue-600", bg: "bg-blue-50", title: "Daily Bonus", desc: "Claim ₹100 every day just for logging in. Stay active and grow your portfolio." },
+              { icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50", title: "Portfolio Tracking", desc: "Track your P&L, win rate, and history. See exactly how sharp your instincts are." },
             ].map((item) => (
               <div key={item.title} className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 card-shadow">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.color.split(" ")[1]}`}>
-                  <item.icon className={`w-4 h-4 ${item.color.split(" ")[0]}`} />
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.bg}`}>
+                  <item.icon className={`w-4 h-4 ${item.color}`} />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-800 text-[13px]">{item.title}</p>
@@ -62,6 +62,7 @@ export default function About() {
           </div>
         </div>
 
+        {/* How payouts work */}
         <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 card-shadow">
           <h2 className="text-base font-bold text-gray-900 mb-3">How Payouts Work</h2>
           <p className="text-sm text-gray-500 leading-relaxed mb-4">
@@ -77,6 +78,7 @@ export default function About() {
           </div>
         </div>
 
+        {/* Rules */}
         <div className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 card-shadow">
           <h2 className="text-base font-bold text-gray-900 mb-3">Rules</h2>
           <ul className="space-y-2.5">
@@ -90,7 +92,7 @@ export default function About() {
               "Attempting to exploit bugs or manipulate outcomes will result in a ban.",
             ].map((rule, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
-                <span className="mt-0.5 w-4.5 h-4.5 shrink-0 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
+                <span className="mt-0.5 w-5 h-5 shrink-0 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
                   {i + 1}
                 </span>
                 {rule}
@@ -99,13 +101,14 @@ export default function About() {
           </ul>
         </div>
 
+        {/* FAQ */}
         <div className="space-y-2.5">
           <h2 className="text-base font-bold text-gray-900">FAQ</h2>
           {[
             { q: "Is real money involved?", a: "No. Predic HSM is 100% virtual. You start with ₹1,00,000 and earn more through correct predictions and daily bonuses. Nothing is real currency." },
-            { q: "Who can use this platform?", a: "Predic HSM is designed for students and staff of Hetauda School of Management. Anyone with a Google account can sign up." },
+            { q: "Who can use this platform?", a: "Predic HSM is designed for students of HSM college. Anyone with a Google account can sign up." },
             { q: "How are markets resolved?", a: "HSM administrators resolve markets once the real-world event outcome is confirmed. Payouts are automatic and immediate." },
-            { q: "Is this affiliated with the school?", a: "No. This is an independent student project and is not officially affiliated with or endorsed by HSM administration." },
+            { q: "Is this affiliated with the college?", a: "No. This is an independent student project and is not officially affiliated with or endorsed by HSM administration." },
           ].map(({ q, a }) => (
             <div key={q} className="bg-white border border-gray-100 rounded-xl p-4 card-shadow">
               <p className="font-semibold text-gray-800 text-sm mb-1">{q}</p>
@@ -114,6 +117,7 @@ export default function About() {
           ))}
         </div>
 
+        {/* CTA */}
         <div className="text-center py-4 space-y-4">
           <p className="text-sm text-gray-400 font-medium">Made with care for HSM students</p>
           <div className="flex items-center justify-center gap-2.5">
@@ -128,7 +132,7 @@ export default function About() {
               </button>
             </Link>
           </div>
-          <p className="text-xs text-gray-300">Virtual currency only · No real money · For campus entertainment only</p>
+          <p className="text-xs text-gray-300">Virtual currency only · No real money · For college entertainment only</p>
         </div>
       </div>
     </Layout>

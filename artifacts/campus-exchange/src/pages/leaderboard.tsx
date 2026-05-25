@@ -9,7 +9,7 @@ export default function Leaderboard() {
   const [period, setPeriod] = useState<GetLeaderboardPeriod>("all-time");
   const [sort, setSort] = useState<GetLeaderboardSort>("richest");
 
-  const { data: leaderboard, isLoading } = useGetLeaderboard({ period, sort });
+  const { data: leaderboard, isLoading, isError } = useGetLeaderboard({ period, sort });
 
   const topThree = leaderboard?.slice(0, 3) ?? [];
 
@@ -66,6 +66,12 @@ export default function Leaderboard() {
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="h-14 rounded-xl shimmer" />
             ))}
+          </div>
+        ) : isError ? (
+          <div className="text-center py-16 bg-white border border-gray-100 rounded-2xl card-shadow">
+            <p className="text-2xl mb-2">⚠️</p>
+            <p className="text-sm font-semibold text-gray-700">Leaderboard unavailable right now</p>
+            <p className="text-xs text-gray-400 mt-1">The database is being set up. Check back soon.</p>
           </div>
         ) : !leaderboard?.length ? (
           <div className="text-center py-16 bg-white border border-gray-100 rounded-2xl card-shadow">

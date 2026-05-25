@@ -10,8 +10,21 @@ router.get("/leaderboard", async (req, res) => {
     sort?: string;
   };
 
-  const usersSnap = await db().collection("users").get();
-  const betsSnap = await db().collection("bets").get();
+  let usersSnap: FirebaseFirestore.QuerySnapshot;
+  let betsSnap: FirebaseFirestore.QuerySnapshot;
+  try {
+    [usersSnap, betsSnap] = await Promise.all([
+      db().collection("users").get(),
+      db().collection("bets").get(),
+    ]);
+  } catch (err: unknown) {
+    const code = (err as { code?: number })?.code;
+    if (code === 16) {
+      res.status(503).json({ error: "Database unavailable: service account lacks Firestore permissions." });
+      return;
+    }
+    throw err;
+  }
 
   const now = Date.now();
   let cutoff = 0;
