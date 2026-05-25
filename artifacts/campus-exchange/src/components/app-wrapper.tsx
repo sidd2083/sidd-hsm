@@ -23,7 +23,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
     },
   });
 
-  const skipRedirectPaths = ["/auth", "/onboarding", "/admin"];
+  const skipRedirectPaths = ["/auth", "/onboarding", "/admin", "/terms", "/privacy"];
   const isOnSkipPath = skipRedirectPaths.some(p => location.startsWith(p));
 
   useEffect(() => {
@@ -31,18 +31,23 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
     if (!user) return;
     if (isOnSkipPath) return;
 
-    const needsProfile = error || !me;
-    if (needsProfile) {
+    // Only redirect to onboarding for a definitive 404 (profile doesn't exist yet).
+    // Do NOT redirect on network errors (API temporarily down) — that would cause
+    // a redirect loop when the server is starting up.
+    const errorStatus = error ? (error as { status?: number }).status : null;
+    const isProfileNotFound = errorStatus === 404;
+
+    if (isProfileNotFound) {
       navigate("/onboarding");
     }
   }, [user, loading, me, meLoading, error, isOnSkipPath]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F8FA]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-muted border-t-foreground rounded-full animate-spin" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <div className="w-6 h-6 border-2 border-gray-200 border-t-indigo-600 rounded-full animate-spin" />
+          <p className="text-xs text-gray-400 font-medium">Loading HSM...</p>
         </div>
       </div>
     );

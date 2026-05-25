@@ -26,7 +26,7 @@ router.post("/users/me", requireAuth, async (req: AuthRequest, res) => {
     section: string;
   };
 
-  if (!displayName || !academicStream || !section) {
+  if (!displayName || !academicStream) {
     res.status(400).json({ error: "Missing required fields" });
     return;
   }
@@ -40,7 +40,7 @@ router.post("/users/me", requireAuth, async (req: AuthRequest, res) => {
     email: userRecord.email ?? "",
     displayName,
     academicStream,
-    section,
+    section: section ?? "",
     walletBalance: STARTING_BALANCE,
     lastDailyClaimDate: todayStr,
   };
