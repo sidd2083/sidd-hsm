@@ -40,7 +40,7 @@ router.get("/markets", optionalAuth, async (req: AuthRequest, res) => {
 });
 
 router.get("/markets/:id", optionalAuth, async (req: AuthRequest, res) => {
-  const doc = await db().collection("markets").doc(req.params["id"]!).get();
+  const doc = await db().collection("markets").doc(req.params["id"] as string).get();
   if (!doc.exists) {
     res.status(404).json({ error: "Market not found" });
     return;
@@ -51,7 +51,7 @@ router.get("/markets/:id", optionalAuth, async (req: AuthRequest, res) => {
 router.get("/markets/:id/bets", optionalAuth, async (req, res) => {
   const snapshot = await db()
     .collection("bets")
-    .where("marketId", "==", req.params["id"]!)
+    .where("marketId", "==", req.params["id"] as string)
     .orderBy("createdAt", "desc")
     .get();
 

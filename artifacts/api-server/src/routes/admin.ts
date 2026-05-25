@@ -50,7 +50,7 @@ router.post("/admin/markets", requireAdmin, async (req: Request, res: Response) 
 
 // Update market (lock manually, update details)
 router.patch("/admin/markets/:id", requireAdmin, async (req: Request, res: Response) => {
-  const marketId = req.params["id"]!;
+  const marketId = req.params["id"] as string;
   const { lockTimestamp, status, question, category } = req.body as {
     lockTimestamp?: number;
     status?: string;
@@ -78,7 +78,7 @@ router.patch("/admin/markets/:id", requireAdmin, async (req: Request, res: Respo
 
 // Delete market
 router.delete("/admin/markets/:id", requireAdmin, async (req: Request, res: Response) => {
-  const marketId = req.params["id"]!;
+  const marketId = req.params["id"] as string;
   const marketRef = db().collection("markets").doc(marketId);
   const marketDoc = await marketRef.get();
   if (!marketDoc.exists) {
@@ -92,7 +92,7 @@ router.delete("/admin/markets/:id", requireAdmin, async (req: Request, res: Resp
 
 // Resolve market
 router.post("/admin/markets/:id/resolve", requireAdmin, async (req: Request, res: Response) => {
-  const marketId = req.params["id"]!;
+  const marketId = req.params["id"] as string;
   const { outcome } = req.body as { outcome: "YES" | "NO" };
 
   if (outcome !== "YES" && outcome !== "NO") {

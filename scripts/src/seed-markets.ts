@@ -51,33 +51,34 @@ const markets = [
   { question: "Did our school top the district in board exams?", category: "college", lockTimestamp: now - 2 * oneDay, status: "resolved", yesPool: 45000, noPool: 15000, winningOutcome: "YES", createdAt: now - 15 * oneDay },
 ];
 
-// Check existing
-const checkRes = await fetch(`${BASE_URL}/markets?pageSize=1`);
-if (checkRes.ok) {
-  const checkData = await checkRes.json() as { documents?: unknown[] };
-  if (checkData.documents && checkData.documents.length > 0) {
-    console.log("Markets already exist, skipping seed.");
-    process.exit(0);
+async function main(): Promise<void> {
+  // Check existing
+  const checkRes = await fetch(`${BASE_URL}/markets?pageSize=1`);
+  if (checkRes.ok) {
+    const checkData = await checkRes.json() as { documents?: unknown[] };
+    if (checkData.documents && checkData.documents.length > 0) {
+      console.log("Markets already exist, skipping seed.");
+      process.exit(0);
+    }
+  }
+
+  for (const m of markets) {
+    const body = toFirestore(m as unknown as Record<string, unknown>);
+    const res = await fetch(`${BASE_URL}/markets`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (res.ok) {
+      const data = await res.json() as { name: string };
+      const id = data.name.split("/").pop();
+      console.log(`Created: ${id} — ${m.question.slice(0, 55)}`);
+    } else {
+      const err = await res.text();
+      console.error(`Failed: ${res.status} ${err.slice(0, 200)}`);
+    }
   }
 }
 
-for (const m of markets) {
-  const body = toFirestore(m as unknown as Record<string, unknown>);
-  const res = await fetch(`${BASE_URL}/markets`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (res.ok) {
-    const data = await res.json() as { name: string };
-    const id = data.name.split("/").pop();
-    console.log(`Created: ${id} — ${m.question.slice(0, 55)}`);
-  } else {
-    const err = await res.text();
-    console.error(`Failed: ${res.status} ${err.slice(0, 200)}`);
-  }
-}
-
-console.log("Done!");
-process.exit(0);
+main().catch((err: unknown) => { console.error(err); process.exit(1); });
