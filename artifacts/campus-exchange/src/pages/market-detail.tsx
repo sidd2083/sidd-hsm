@@ -51,7 +51,7 @@ function BetPanel({ marketId, isLocked, yesPool, noPool }: {
       { data: { marketId, type: side, amountPaid: numAmount } },
       {
         onSuccess: () => {
-          toast.success(`🎯 Bet placed on ${side}!`);
+          toast.success(`Bet placed on ${side}!`);
           queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
           queryClient.invalidateQueries({ queryKey: getListMyBetsQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetMarketQueryKey(marketId) });
