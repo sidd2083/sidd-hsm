@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, googleProvider } from "./firebase";
-import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, User } from "firebase/auth";
+import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, User, getAdditionalUserInfo } from "firebase/auth";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface AuthContextType {
@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async () => {
     const result = await signInWithPopup(auth, googleProvider);
     // If brand new Google account, mark that onboarding is needed
-    if (result.additionalUserInfo?.isNewUser) {
+    if (getAdditionalUserInfo(result)?.isNewUser) {
       localStorage.setItem(`needs_onboarding_${result.user.uid}`, "true");
     }
   };

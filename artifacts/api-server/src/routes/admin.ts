@@ -73,7 +73,7 @@ router.post("/admin/categories", requireAdmin, async (req, res) => {
 
 router.delete("/admin/categories/:name", requireAdmin, async (req, res) => {
   try {
-    const slug = req.params.name.toLowerCase();
+    const slug = String(req.params.name).toLowerCase();
     const db = getFirestore();
     await db.collection("categories").doc(slug).delete();
     res.status(204).send();
@@ -127,7 +127,7 @@ router.post("/admin/markets", requireAdmin, async (req, res) => {
 router.patch("/admin/markets/:id", requireAdmin, async (req, res) => {
   try {
     const db = getFirestore();
-    const ref = db.collection("markets").doc(req.params.id);
+    const ref = db.collection("markets").doc(String(req.params.id));
     const doc = await ref.get();
 
     if (!doc.exists) {
@@ -176,7 +176,7 @@ router.patch("/admin/markets/:id", requireAdmin, async (req, res) => {
 router.delete("/admin/markets/:id", requireAdmin, async (req, res) => {
   try {
     const db = getFirestore();
-    const ref = db.collection("markets").doc(req.params.id);
+    const ref = db.collection("markets").doc(String(req.params.id));
     const doc = await ref.get();
 
     if (!doc.exists) {
@@ -202,7 +202,7 @@ router.post("/admin/markets/:id/resolve", requireAdmin, async (req, res) => {
 
     const outcome = parsed.data.outcome;
     const db = getFirestore();
-    const marketRef = db.collection("markets").doc(req.params.id);
+    const marketRef = db.collection("markets").doc(String(req.params.id));
     const marketDoc = await marketRef.get();
 
     if (!marketDoc.exists) {
@@ -307,7 +307,7 @@ router.post("/admin/users/:id/wallet", requireAdmin, async (req, res) => {
     }
 
     const db = getFirestore();
-    const ref = db.collection("users").doc(req.params.id);
+    const ref = db.collection("users").doc(String(req.params.id));
     const doc = await ref.get();
 
     if (!doc.exists) {

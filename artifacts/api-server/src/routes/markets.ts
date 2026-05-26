@@ -52,7 +52,7 @@ router.get("/markets", optionalAuth, async (req, res) => {
 router.get("/markets/:id", optionalAuth, async (req, res) => {
   try {
     const db = getFirestore();
-    const doc = await db.collection("markets").doc(req.params.id).get();
+    const doc = await db.collection("markets").doc(String(req.params.id)).get();
 
     if (!doc.exists) {
       res.status(404).json({ error: "Market not found" });
@@ -114,7 +114,7 @@ router.post("/markets/:id/bets", requireAuth, async (req: AuthenticatedRequest, 
     }
 
     const db = getFirestore();
-    const marketRef = db.collection("markets").doc(req.params.id);
+    const marketRef = db.collection("markets").doc(String(req.params.id));
     const userRef = db.collection("users").doc(req.uid!);
 
     const result = await db.runTransaction(async (tx) => {
