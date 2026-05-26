@@ -1,14 +1,22 @@
 import { Router } from "express";
-import { admin } from "../lib/firebase-admin";
+import { admin, isFirebaseReady } from "../lib/firebase-admin";
 import type { Request, Response, NextFunction } from "express";
 
 const router = Router();
-const db = () => admin.firestore();
+const db = () => {
+  if (!isFirebaseReady()) throw Object.assign(new Error("Firebase not initialized"), { status: 503 });
+  return admin.firestore();
+};
 
-const ADMIN_USERNAME = process.env["ADMIN_USERNAME"] || "siddhant";
-const ADMIN_PASSWORD = process.env["ADMIN_PASSWORD"] || "siddhant2078";
+// Admin credentials must be set via environment variables — no hardcoded fallbacks
+const ADMIN_USERNAME = process.env["ADMIN_USERNAME"];
+const ADMIN_PASSWORD = process.env["ADMIN_PASSWORD"];
 
 function requireAdmin(req: Request, res: Response, next: NextFunction): void {
+  if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
+    res.status(503).json({ error: "Admin credentials not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD env vars." });
+    return;
+  }
   const username = req.headers["x-admin-username"];
   const password = req.headers["x-admin-password"];
   if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
@@ -48,7 +56,7 @@ router.post("/admin/markets", requireAdmin, async (req: Request, res: Response) 
   res.status(201).json({ id: ref.id, ...marketData });
 });
 
-// Update market (lock manually, update details)
+// Update market
 router.patch("/admin/markets/:id", requireAdmin, async (req: Request, res: Response) => {
   const marketId = req.params["id"] as string;
   const { lockTimestamp, status, question, category } = req.body as {
@@ -60,16 +68,13 @@ router.patch("/admin/markets/:id", requireAdmin, async (req: Request, res: Respo
 
   const marketRef = db().collection("markets").doc(marketId);
   const marketDoc = await marketRef.get();
-  if (!marketDoc.exists) {
-    res.status(404).json({ error: "Market not found" });
-    return;
-  }
+  if (!marketDoc.exists) { res.status(404).json({ error: "Market not found" }); return; }
 
   const updates: Record<string, unknown> = {};
   if (lockTimestamp !== undefined) updates["lockTimestamp"] = lockTimestamp;
-  if (status !== undefined) updates["status"] = status;
-  if (question !== undefined) updates["question"] = question;
-  if (category !== undefined) updates["category"] = category;
+  if (status       !== undefined) updates["status"]        = status;
+  if (question     !== undefined) updates["question"]      = question;
+  if (category     !== undefined) updates["category"]      = category;
 
   await marketRef.update(updates);
   const updated = await marketRef.get();
@@ -81,16 +86,12 @@ router.delete("/admin/markets/:id", requireAdmin, async (req: Request, res: Resp
   const marketId = req.params["id"] as string;
   const marketRef = db().collection("markets").doc(marketId);
   const marketDoc = await marketRef.get();
-  if (!marketDoc.exists) {
-    res.status(404).json({ error: "Market not found" });
-    return;
-  }
-
+  if (!marketDoc.exists) { res.status(404).json({ error: "Market not found" }); return; }
   await marketRef.delete();
   res.json({ deleted: true, id: marketId });
 });
 
-// Resolve market
+// Resolve market — distributes payouts to winners and marks losing bets
 router.post("/admin/markets/:id/resolve", requireAdmin, async (req: Request, res: Response) => {
   const marketId = req.params["id"] as string;
   const { outcome } = req.body as { outcome: "YES" | "NO" };
@@ -102,11 +103,7 @@ router.post("/admin/markets/:id/resolve", requireAdmin, async (req: Request, res
 
   const marketRef = db().collection("markets").doc(marketId);
   const marketDoc = await marketRef.get();
-
-  if (!marketDoc.exists) {
-    res.status(404).json({ error: "Market not found" });
-    return;
-  }
+  if (!marketDoc.exists) { res.status(404).json({ error: "Market not found" }); return; }
 
   const market = marketDoc.data()!;
   if (market["status"] === "resolved") {
@@ -114,8 +111,8 @@ router.post("/admin/markets/:id/resolve", requireAdmin, async (req: Request, res
     return;
   }
 
-  const yesPool = (market["yesPool"] as number) || 0;
-  const noPool = (market["noPool"] as number) || 0;
+  const yesPool  = (market["yesPool"] as number) || 0;
+  const noPool   = (market["noPool"]  as number) || 0;
   const totalPool = yesPool + noPool;
 
   await marketRef.update({ status: "resolved", winningOutcome: outcome });
@@ -125,33 +122,25 @@ router.post("/admin/markets/:id/resolve", requireAdmin, async (req: Request, res
     return;
   }
 
-  const betsSnap = await db()
-    .collection("bets")
-    .where("marketId", "==", marketId)
-    .where("type", "==", outcome)
-    .get();
-
   const winningPool = outcome === "YES" ? yesPool : noPool;
+
+  const [winSnap, loseSnap] = await Promise.all([
+    db().collection("bets").where("marketId", "==", marketId).where("type", "==", outcome).get(),
+    db().collection("bets").where("marketId", "==", marketId).where("type", "==", outcome === "YES" ? "NO" : "YES").get(),
+  ]);
+
   const batch = db().batch();
 
-  for (const betDoc of betsSnap.docs) {
-    const bet = betDoc.data();
+  for (const betDoc of winSnap.docs) {
+    const bet       = betDoc.data();
     const amountPaid = (bet["amountPaid"] as number) || 0;
-    const payout = (amountPaid / winningPool) * totalPool;
-    const userRef = db().collection("users").doc(bet["userId"] as string);
-    batch.update(userRef, {
-      walletBalance: admin.firestore.FieldValue.increment(Math.floor(payout)),
-    });
-    batch.update(betDoc.ref, { status: "won", payout: Math.floor(payout) });
+    const payout    = Math.floor((amountPaid / winningPool) * totalPool);
+    const userRef   = db().collection("users").doc(bet["userId"] as string);
+    batch.update(userRef,    { walletBalance: admin.firestore.FieldValue.increment(payout) });
+    batch.update(betDoc.ref, { status: "won", payout });
   }
 
-  const losingBetsSnap = await db()
-    .collection("bets")
-    .where("marketId", "==", marketId)
-    .where("type", "==", outcome === "YES" ? "NO" : "YES")
-    .get();
-
-  for (const betDoc of losingBetsSnap.docs) {
+  for (const betDoc of loseSnap.docs) {
     batch.update(betDoc.ref, { status: "lost", payout: 0 });
   }
 
@@ -163,20 +152,11 @@ router.post("/admin/markets/:id/resolve", requireAdmin, async (req: Request, res
 // Adjust user wallet
 router.patch("/admin/users/:uid/wallet", requireAdmin, async (req: Request, res: Response) => {
   const { uid } = req.params as { uid: string };
-  const { amount } = req.body as { amount: number; reason: string };
-
+  const { amount } = req.body as { amount: number };
   const userRef = db().collection("users").doc(uid);
   const userDoc = await userRef.get();
-
-  if (!userDoc.exists) {
-    res.status(404).json({ error: "User not found" });
-    return;
-  }
-
-  await userRef.update({
-    walletBalance: admin.firestore.FieldValue.increment(amount),
-  });
-
+  if (!userDoc.exists) { res.status(404).json({ error: "User not found" }); return; }
+  await userRef.update({ walletBalance: admin.firestore.FieldValue.increment(amount) });
   const updated = await userRef.get();
   res.json({ uid, ...updated.data() });
 });
@@ -184,11 +164,10 @@ router.patch("/admin/users/:uid/wallet", requireAdmin, async (req: Request, res:
 // List all users
 router.get("/admin/users", requireAdmin, async (_req: Request, res: Response) => {
   const snap = await db().collection("users").orderBy("walletBalance", "desc").get();
-  const users = snap.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
-  res.json(users);
+  res.json(snap.docs.map((doc) => ({ uid: doc.id, ...doc.data() })));
 });
 
-// Get platform stats
+// Platform stats
 router.get("/admin/stats", requireAdmin, async (_req: Request, res: Response) => {
   const [marketsSnap, betsSnap, usersSnap] = await Promise.all([
     db().collection("markets").get(),
@@ -196,10 +175,10 @@ router.get("/admin/stats", requireAdmin, async (_req: Request, res: Response) =>
     db().collection("users").get(),
   ]);
 
-  const markets = marketsSnap.docs.map(d => d.data());
-  const activeMarkets = markets.filter(m => m["status"] === "active").length;
+  const markets        = marketsSnap.docs.map(d => d.data());
+  const activeMarkets  = markets.filter(m => m["status"] === "active").length;
   const resolvedMarkets = markets.filter(m => m["status"] === "resolved").length;
-  const totalVolume = betsSnap.docs.reduce((sum, d) => sum + ((d.data()["amountPaid"] as number) || 0), 0);
+  const totalVolume    = betsSnap.docs.reduce((sum, d) => sum + ((d.data()["amountPaid"] as number) || 0), 0);
 
   res.json({
     totalMarkets: marketsSnap.size,
@@ -211,7 +190,7 @@ router.get("/admin/stats", requireAdmin, async (_req: Request, res: Response) =>
   });
 });
 
-// Get/manage categories
+// Categories
 router.get("/admin/categories", requireAdmin, async (_req: Request, res: Response) => {
   const doc = await db().collection("config").doc("categories").get();
   const custom = doc.exists ? ((doc.data()?.["list"] as string[]) ?? []) : [];
@@ -220,10 +199,7 @@ router.get("/admin/categories", requireAdmin, async (_req: Request, res: Respons
 
 router.post("/admin/categories", requireAdmin, async (req: Request, res: Response) => {
   const { name } = req.body as { name: string };
-  if (!name || name.trim().length === 0) {
-    res.status(400).json({ error: "Category name required" });
-    return;
-  }
+  if (!name || name.trim().length === 0) { res.status(400).json({ error: "Category name required" }); return; }
   const slug = name.trim().toLowerCase().replace(/\s+/g, "-");
   await db().collection("config").doc("categories").set(
     { list: admin.firestore.FieldValue.arrayUnion(slug) },

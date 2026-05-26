@@ -15,75 +15,84 @@ router.get("/leaderboard", async (req, res) => {
 
   let usersSnap: FirebaseFirestore.QuerySnapshot;
   let betsSnap: FirebaseFirestore.QuerySnapshot;
+  let marketsSnap: FirebaseFirestore.QuerySnapshot;
+
   try {
-    [usersSnap, betsSnap] = await Promise.all([
+    [usersSnap, betsSnap, marketsSnap] = await Promise.all([
       db().collection("users").get(),
       db().collection("bets").get(),
+      db().collection("markets").get(),
     ]);
   } catch (err: unknown) {
-    const code = (err as { code?: number })?.code;
-    if (code === 16) {
-      res.status(503).json({ error: "Database unavailable: service account lacks Firestore permissions." });
+    const e = err as { code?: number; status?: number };
+    if (e.code === 16 || e.status === 503) {
+      res.status(503).json({ error: "Database unavailable." });
       return;
     }
     throw err;
   }
 
+  // Build market lookup for outcome + status (source of truth)
+  const marketLookup: Record<string, { status: string; winningOutcome: string | null }> = {};
+  marketsSnap.docs.forEach((d) => {
+    const data = d.data();
+    marketLookup[d.id] = {
+      status:         data["status"]         as string,
+      winningOutcome: (data["winningOutcome"] as string | null) ?? null,
+    };
+  });
+
   const now = Date.now();
   let cutoff = 0;
-  if (period === "daily") {
-    cutoff = now - 24 * 60 * 60 * 1000;
-  } else if (period === "weekly") {
-    cutoff = now - 7 * 24 * 60 * 60 * 1000;
-  }
+  if (period === "daily")  cutoff = now - 24 * 60 * 60 * 1000;
+  if (period === "weekly") cutoff = now - 7 * 24 * 60 * 60 * 1000;
 
-  const userBetStats: Record<
-    string,
-    { totalProfit: number; totalLoss: number; stakedValue: number }
-  > = {};
+  // Aggregate per-user bet stats — source of truth is the market document
+  const userStats: Record<string, { totalProfit: number; totalLoss: number; stakedValue: number }> = {};
 
   for (const betDoc of betsSnap.docs) {
     const bet = betDoc.data();
-    const uid = bet["userId"] as string;
-    const createdAt = (bet["createdAt"] as number) || 0;
+    const uid        = bet["userId"]    as string;
+    const marketId   = bet["marketId"]  as string;
+    const createdAt  = (bet["createdAt"]  as number) || 0;
     const amountPaid = (bet["amountPaid"] as number) || 0;
-    const type = bet["type"] as string;
-    const winningOutcome = bet["winningOutcome"] as string | null;
-    const marketStatus = bet["marketStatus"] as string | null;
+    const betType    = bet["type"]      as string;
 
-    if (!userBetStats[uid]) {
-      userBetStats[uid] = { totalProfit: 0, totalLoss: 0, stakedValue: 0 };
-    }
-
+    if (!userStats[uid]) userStats[uid] = { totalProfit: 0, totalLoss: 0, stakedValue: 0 };
     if (cutoff && createdAt < cutoff) continue;
 
-    if (marketStatus === "resolved") {
-      if (type === winningOutcome) {
-        userBetStats[uid].totalProfit += amountPaid;
+    const market = marketLookup[marketId];
+    if (!market) continue;
+
+    if (market.status === "resolved") {
+      if (betType === market.winningOutcome) {
+        // Use stored payout if available; otherwise fall back to amountPaid as proxy
+        const payout = (bet["payout"] as number) || amountPaid;
+        userStats[uid].totalProfit += payout - amountPaid; // net gain
       } else {
-        userBetStats[uid].totalLoss += amountPaid;
+        userStats[uid].totalLoss += amountPaid;
       }
     } else {
-      userBetStats[uid].stakedValue += amountPaid;
+      userStats[uid].stakedValue += amountPaid; // still in play
     }
   }
 
   const entries = usersSnap.docs.map((doc) => {
-    const data = doc.data();
-    const uid = doc.id;
+    const data          = doc.data();
+    const uid           = doc.id;
     const walletBalance = (data["walletBalance"] as number) || 0;
-    const stats = userBetStats[uid] || { totalProfit: 0, totalLoss: 0, stakedValue: 0 };
-    const netWorth = walletBalance + stats.stakedValue;
+    const stats         = userStats[uid] || { totalProfit: 0, totalLoss: 0, stakedValue: 0 };
+    const netWorth      = walletBalance + stats.stakedValue;
 
     return {
       uid,
-      displayName: data["displayName"] as string,
+      displayName:   data["displayName"]   as string,
       academicStream: data["academicStream"] as string,
-      section: data["section"] as string,
+      section:       data["section"]       as string,
       walletBalance,
       netWorth,
       totalProfit: stats.totalProfit,
-      totalLoss: stats.totalLoss,
+      totalLoss:   stats.totalLoss,
       rank: 0,
     };
   });
@@ -97,9 +106,7 @@ router.get("/leaderboard", async (req, res) => {
     sorted = entries.sort((a, b) => b.netWorth - a.netWorth);
   }
 
-  sorted.forEach((e, i) => {
-    e.rank = i + 1;
-  });
+  sorted.forEach((e, i) => { e.rank = i + 1; });
 
   res.json(sorted);
 });
