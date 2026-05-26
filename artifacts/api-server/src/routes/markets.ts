@@ -1,9 +1,12 @@
 import { Router } from "express";
-import { admin } from "../lib/firebase-admin";
+import { admin, isFirebaseReady } from "../lib/firebase-admin";
 import { optionalAuth, type AuthRequest } from "../middlewares/auth";
 
 const router = Router();
-const db = () => admin.firestore();
+const db = () => {
+  if (!isFirebaseReady()) throw Object.assign(new Error("Firebase not initialized"), { status: 503 });
+  return admin.firestore();
+};
 
 router.get("/markets", optionalAuth, async (req: AuthRequest, res) => {
   const { category, status } = req.query as {

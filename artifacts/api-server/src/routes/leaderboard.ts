@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { admin } from "../lib/firebase-admin";
+import { admin, isFirebaseReady } from "../lib/firebase-admin";
 
 const router = Router();
-const db = () => admin.firestore();
+const db = () => {
+  if (!isFirebaseReady()) throw Object.assign(new Error("Firebase not initialized"), { status: 503 });
+  return admin.firestore();
+};
 
 router.get("/leaderboard", async (req, res) => {
   const { period = "all-time", sort = "richest" } = req.query as {

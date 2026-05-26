@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { admin } from "../lib/firebase-admin";
+import { admin, isFirebaseReady } from "../lib/firebase-admin";
 
 export interface AuthRequest extends Request {
   uid?: string;
@@ -10,6 +10,14 @@ export async function requireAuth(
   res: Response,
   next: NextFunction,
 ): Promise<void> {
+  if (!isFirebaseReady()) {
+    res.status(503).json({
+      error: "Service not configured",
+      message: "The server is not yet connected to the database. Please add the FIREBASE_SERVICE_ACCOUNT secret.",
+    });
+    return;
+  }
+
   const authHeader = req.headers["authorization"];
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({ error: "Unauthorized" });
@@ -30,15 +38,15 @@ export async function optionalAuth(
   _res: Response,
   next: NextFunction,
 ): Promise<void> {
+  if (!isFirebaseReady()) { next(); return; }
+
   const authHeader = req.headers["authorization"];
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.slice(7);
     try {
       const decoded = await admin.auth().verifyIdToken(token);
       req.uid = decoded.uid;
-    } catch {
-      // ignore invalid token for optional auth
-    }
+    } catch { /* ignore */ }
   }
   next();
 }
