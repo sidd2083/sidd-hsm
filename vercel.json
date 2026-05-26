@@ -1,6 +1,11 @@
 {
   "outputDirectory": "artifacts/campus-exchange/dist/public",
+  "functions": {
+    "api/[[...path]].ts": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
-    { "source": "/((?!index\\.html).*)", "destination": "/index.html" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
