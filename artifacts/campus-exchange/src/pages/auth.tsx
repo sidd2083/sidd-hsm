@@ -24,7 +24,7 @@ const FEATURES = [
   { label: "Predict sports, college & national events" },
   { label: "Compete on the leaderboard with classmates" },
   { label: "Track your P&L and win rate" },
-  { label: "Markets created by HSM administrators only" },
+  { label: "Daily bonus of ₹100 just for logging in" },
 ];
 
 export default function Auth() {
