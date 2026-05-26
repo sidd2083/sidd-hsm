@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { useGetMe, getGetMeQueryKey, setAuthTokenGetter } from "@workspace/api-client-react";
+import { useGetMe, getGetMeQueryKey, setAuthTokenGetter, setBaseUrl } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { auth } from "@/lib/firebase";
 
@@ -9,6 +9,11 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
 
   useEffect(() => {
+    // Point API calls at the external backend when VITE_API_URL is set
+    // (required on Vercel — the Express server runs separately)
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (apiUrl) setBaseUrl(apiUrl.replace(/\/+$/, ""));
+
     setAuthTokenGetter(async () => {
       if (!auth.currentUser) return null;
       return auth.currentUser.getIdToken();
