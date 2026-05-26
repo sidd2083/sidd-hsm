@@ -40,9 +40,13 @@ router.get("/admin/stats", requireAdmin, async (req, res) => {
 router.get("/admin/categories", requireAdmin, async (req, res) => {
   try {
     const db = getFirestore();
-    const snap = await db.collection("markets").select("category").get();
-    const allCats = snap.docs.map((d) => d.data().category as string).filter(Boolean);
-    const unique = [...new Set(allCats)];
+    const [marketsSnap, customCatsSnap] = await Promise.all([
+      db.collection("markets").select("category").get(),
+      db.collection("categories").get(),
+    ]);
+    const marketCats = marketsSnap.docs.map((d) => d.data().category as string).filter(Boolean);
+    const customCats = customCatsSnap.docs.map((d) => d.data().name as string).filter(Boolean);
+    const unique = [...new Set([...customCats, ...marketCats])];
     res.json({ categories: unique });
   } catch (err) {
     req.log.error({ err }, "adminCategories error");
@@ -213,38 +217,33 @@ router.post("/admin/markets/:id/resolve", requireAdmin, async (req, res) => {
 
     await marketRef.update({ status: "resolved", outcome, resolvedAt: now });
 
-    if (winPool > 0) {
-      const betsSnap = await db
-        .collection("bets")
-        .where("marketId", "==", req.params.id)
-        .where("side", "==", outcome)
-        .get();
+    // Settle all bets for this market regardless of winPool
+    const allBetsSnap = await db
+      .collection("bets")
+      .where("marketId", "==", req.params.id)
+      .get();
 
-      const batch = db.batch();
-      for (const betDoc of betsSnap.docs) {
-        const bet = betDoc.data();
+    const batch = db.batch();
+
+    for (const betDoc of allBetsSnap.docs) {
+      const bet = betDoc.data();
+      const isWinner = bet.side === outcome;
+
+      if (isWinner && winPool > 0) {
         const payout = Math.floor(((bet.amountPaid ?? 0) / winPool) * totalPool);
         batch.update(betDoc.ref, { status: "won", payout });
-
         const userRef = db.collection("users").doc(bet.userId);
         batch.update(userRef, {
           walletBalance: FieldValue.increment(payout),
           totalWon: FieldValue.increment(1),
         });
-      }
-
-      const lostSnap = await db
-        .collection("bets")
-        .where("marketId", "==", req.params.id)
-        .where("side", "==", outcome === "YES" ? "NO" : "YES")
-        .get();
-
-      for (const betDoc of lostSnap.docs) {
+      } else {
+        // Loser, or winner with no opposing pool (mark lost, no payout)
         batch.update(betDoc.ref, { status: "lost", payout: 0 });
       }
-
-      await batch.commit();
     }
+
+    await batch.commit();
 
     const updated = await marketRef.get();
     const data = updated.data()!;

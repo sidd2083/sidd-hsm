@@ -11,8 +11,8 @@ import {
 
 const router = Router();
 
-const INITIAL_BALANCE = 10000;
-const DAILY_BONUS = 500;
+const INITIAL_BALANCE = 100000;
+const DAILY_BONUS = 100;
 
 router.get("/users/me", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
