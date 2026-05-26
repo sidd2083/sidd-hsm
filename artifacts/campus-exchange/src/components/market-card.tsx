@@ -21,7 +21,8 @@ export function MarketCard({ market }: { market: Market }) {
   );
 
   const noPercentage = 100 - yesPercentage;
-  const isLocked = market.status !== "active" || Date.now() >= market.lockTimestamp;
+  const closesAtMs = market.closesAt ? new Date(market.closesAt).getTime() : Infinity;
+  const isLocked = market.status !== "open" || Date.now() >= closesAtMs;
   const isResolved = market.status === "resolved";
   const config = categoryConfig(market.category);
   const catLabel = market.category.charAt(0).toUpperCase() + market.category.slice(1);
@@ -59,19 +60,19 @@ export function MarketCard({ market }: { market: Market }) {
             )}
           </div>
 
-          {/* Question */}
+          {/* Title */}
           <p className="text-[15px] font-semibold leading-snug text-gray-800 line-clamp-3 flex-1 group-hover:text-indigo-700 transition-colors duration-150">
-            {market.question}
+            {market.title}
           </p>
 
           {/* Probability / Result */}
-          {isResolved && market.winningOutcome ? (
+          {isResolved && market.outcome ? (
             <div className={cn(
               "rounded-xl px-4 py-3.5 text-center",
-              market.winningOutcome === "YES" ? "bg-emerald-50 border border-emerald-200" : "bg-red-50 border border-red-200"
+              market.outcome === "YES" ? "bg-emerald-50 border border-emerald-200" : "bg-red-50 border border-red-200"
             )}>
-              <p className={cn("text-2xl font-black tracking-tight", market.winningOutcome === "YES" ? "text-emerald-600" : "text-red-500")}>
-                {market.winningOutcome === "YES" ? "YES Won" : "NO Won"}
+              <p className={cn("text-2xl font-black tracking-tight", market.outcome === "YES" ? "text-emerald-600" : "text-red-500")}>
+                {market.outcome === "YES" ? "YES Won" : "NO Won"}
               </p>
               <p className="text-[12px] text-gray-400 mt-0.5">Volume {formatCurrency(totalPool)}</p>
             </div>

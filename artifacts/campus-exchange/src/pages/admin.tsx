@@ -285,13 +285,14 @@ function ManageMarkets({ creds }: { creds: { username: string; password: string 
   const resolveMarket = useAdminResolveMarket();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "locked" | "resolved">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "locked" | "resolved">("all");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [lockingId, setLockingId] = useState<string | null>(null);
 
   const filtered = markets?.filter(m => {
-    const matchSearch = search.trim() === "" || m.question.toLowerCase().includes(search.toLowerCase()) || m.category.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "all" || m.status === statusFilter || (statusFilter === "locked" && Date.now() >= m.lockTimestamp && m.status === "active");
+    const closesAtMs = m.closesAt ? new Date(m.closesAt).getTime() : Infinity;
+    const matchSearch = search.trim() === "" || m.title.toLowerCase().includes(search.toLowerCase()) || m.category.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "all" || m.status === statusFilter || (statusFilter === "locked" && Date.now() >= closesAtMs && m.status === "open");
     return matchSearch && matchStatus;
   }) ?? [];
 
@@ -306,8 +307,8 @@ function ManageMarkets({ creds }: { creds: { username: string; password: string 
     });
   };
 
-  const handleDelete = async (id: string, question: string) => {
-    if (!confirm(`Delete market:\n"${question}"\n\nThis permanently removes the market. Bets are NOT refunded.`)) return;
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Delete market:\n"${title}"\n\nThis permanently removes the market. Bets are NOT refunded.`)) return;
     setDeletingId(id);
     try {
       await adminFetch(`/admin/markets/${id}`, creds, { method: "DELETE" });
@@ -326,7 +327,7 @@ function ManageMarkets({ creds }: { creds: { username: string; password: string 
     try {
       await adminFetch(`/admin/markets/${id}`, creds, {
         method: "PATCH",
-        body: JSON.stringify({ lockTimestamp: Date.now() - 1 }),
+        body: JSON.stringify({ status: "locked" }),
       });
       toast.success("Market locked");
       queryClient.invalidateQueries({ queryKey: getListMarketsQueryKey() });
@@ -351,7 +352,7 @@ function ManageMarkets({ creds }: { creds: { username: string; password: string 
           />
         </div>
         <div className="flex gap-1 bg-white border border-[#E8EAF0] rounded-xl p-1">
-          {(["all", "active", "locked", "resolved"] as const).map(s => (
+          {(["all", "open", "locked", "resolved"] as const).map(s => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
@@ -379,7 +380,8 @@ function ManageMarkets({ creds }: { creds: { username: string; password: string 
       ) : (
         <div className="space-y-2">
           {filtered.map(market => {
-            const isEffectivelyLocked = market.status !== "active" || Date.now() >= market.lockTimestamp;
+            const closesAtMs = market.closesAt ? new Date(market.closesAt).getTime() : Infinity;
+            const isEffectivelyLocked = market.status !== "open" || Date.now() >= closesAtMs;
             const isResolved = market.status === "resolved";
             const totalPool = market.yesPool + market.noPool;
             return (
@@ -393,23 +395,25 @@ function ManageMarkets({ creds }: { creds: { username: string; password: string 
                           : isEffectivelyLocked ? "bg-slate-100 text-slate-500"
                           : "bg-blue-100 text-blue-600"
                       )}>
-                        {isResolved ? "Resolved" : isEffectivelyLocked ? "Locked" : "Active"}
+                        {isResolved ? "Resolved" : isEffectivelyLocked ? "Locked" : "Open"}
                       </span>
                       <span className="text-[10px] font-semibold text-gray-400 capitalize px-2 py-0.5 rounded-full bg-slate-50 border border-[#E8EAF0]">
                         {market.category}
                       </span>
-                      {isResolved && market.winningOutcome && (
+                      {isResolved && market.outcome && (
                         <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                          {market.winningOutcome} Won
+                          {market.outcome} Won
                         </span>
                       )}
                     </div>
-                    <p className="text-sm font-semibold text-gray-800 line-clamp-2">{market.question}</p>
+                    <p className="text-sm font-semibold text-gray-800 line-clamp-2">{market.title}</p>
                     <div className="flex flex-wrap gap-4 text-xs text-gray-400 font-mono">
                       <span>YES: {formatCurrency(market.yesPool)}</span>
                       <span>NO: {formatCurrency(market.noPool)}</span>
                       <span className="font-semibold text-gray-600">Total: {formatCurrency(totalPool)}</span>
-                      <span className="font-sans">Locks: {new Date(market.lockTimestamp).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                      {market.closesAt && (
+                        <span className="font-sans">Closes: {new Date(market.closesAt).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                      )}
                     </div>
                   </div>
 
@@ -443,7 +447,7 @@ function ManageMarkets({ creds }: { creds: { username: string; password: string 
                         </button>
                       )}
                       <button
-                        onClick={() => handleDelete(market.id, market.question)}
+                        onClick={() => handleDelete(market.id, market.title)}
                         disabled={deletingId === market.id}
                         className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
                       >
@@ -502,7 +506,7 @@ function CreateMarket({ creds }: { creds: { username: string; password: string }
     const lockTimestamp = getLockTimestamp();
     if (lockTimestamp <= Date.now()) { toast.error("Lock time must be in the future"); return; }
     createMarket.mutate(
-      { data: { question: form.question, category: category as never, lockTimestamp } },
+      { data: { title: form.question, description: form.description || "", category: category as never, closesAt: new Date(lockTimestamp).toISOString() } },
       {
         onSuccess: () => {
           toast.success("Market created!");

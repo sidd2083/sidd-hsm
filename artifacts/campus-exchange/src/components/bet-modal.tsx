@@ -47,7 +47,7 @@ export function BetModal({ market, side, open, onOpenChange }: BetModalProps) {
     if (numAmount <= 0) return;
 
     placeBet.mutate(
-      { data: { marketId: market.id, type: side, amountPaid: numAmount } },
+      { id: market.id, data: { side, amount: numAmount } },
       {
         onSuccess: () => {
           toast.success(`Bet of ${formatCurrency(numAmount)} placed on ${side}! 🎉`);
@@ -79,7 +79,7 @@ export function BetModal({ market, side, open, onOpenChange }: BetModalProps) {
               Betting {isYes ? "YES" : "NO"}
             </DialogTitle>
           </DialogHeader>
-          <p className="text-white/80 text-sm mt-1 leading-snug line-clamp-2">{market.question}</p>
+          <p className="text-white/80 text-sm mt-1 leading-snug line-clamp-2">{market.title}</p>
           <div className="mt-3 flex items-center gap-3">
             <div className="bg-white/15 rounded-xl px-4 py-2 text-center">
               <p className="text-white/70 text-xs">Multiplier</p>

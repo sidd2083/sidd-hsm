@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { FieldValue } from "firebase-admin/firestore";
 import { requireAdmin } from "../middlewares/auth";
 import { getFirestore } from "../lib/firebase-admin";
 import {
@@ -8,6 +9,46 @@ import {
 } from "@workspace/api-zod";
 
 const router = Router();
+
+router.get("/admin/stats", requireAdmin, async (req, res) => {
+  try {
+    const db = getFirestore();
+    const [marketsSnap, usersSnap, betsSnap] = await Promise.all([
+      db.collection("markets").get(),
+      db.collection("users").get(),
+      db.collection("bets").get(),
+    ]);
+
+    const markets = marketsSnap.docs.map((d) => d.data());
+    const totalVolume = betsSnap.docs.reduce((sum, d) => sum + (d.data().amountPaid ?? 0), 0);
+
+    res.json({
+      totalMarkets: markets.length,
+      activeMarkets: markets.filter((m) => m.status === "open").length,
+      lockedMarkets: markets.filter((m) => m.status === "locked").length,
+      resolvedMarkets: markets.filter((m) => m.status === "resolved").length,
+      totalUsers: usersSnap.size,
+      totalBets: betsSnap.size,
+      totalVolume,
+    });
+  } catch (err) {
+    req.log.error({ err }, "adminStats error");
+    res.status(503).json({ error: "Service unavailable" });
+  }
+});
+
+router.get("/admin/categories", requireAdmin, async (req, res) => {
+  try {
+    const db = getFirestore();
+    const snap = await db.collection("markets").select("category").get();
+    const allCats = snap.docs.map((d) => d.data().category as string).filter(Boolean);
+    const unique = [...new Set(allCats)];
+    res.json({ categories: unique });
+  } catch (err) {
+    req.log.error({ err }, "adminCategories error");
+    res.status(503).json({ error: "Service unavailable" });
+  }
+});
 
 router.post("/admin/markets", requireAdmin, async (req, res) => {
   try {
@@ -46,6 +87,74 @@ router.post("/admin/markets", requireAdmin, async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "adminCreateMarket error");
+    res.status(503).json({ error: "Service unavailable" });
+  }
+});
+
+router.patch("/admin/markets/:id", requireAdmin, async (req, res) => {
+  try {
+    const db = getFirestore();
+    const ref = db.collection("markets").doc(req.params.id);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      res.status(404).json({ error: "Market not found" });
+      return;
+    }
+
+    const updates: Record<string, unknown> = {};
+    if (req.body.status !== undefined) updates.status = req.body.status;
+    if (req.body.closesAt !== undefined) {
+      updates.closesAt = req.body.closesAt ? new Date(req.body.closesAt) : null;
+    }
+    if (req.body.lockTimestamp !== undefined) {
+      updates.closesAt = new Date(req.body.lockTimestamp);
+    }
+
+    if (Object.keys(updates).length === 0) {
+      updates.status = "locked";
+    }
+
+    await ref.update(updates);
+    const updated = await ref.get();
+    const data = updated.data()!;
+
+    res.json({
+      id: updated.id,
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      status: data.status,
+      outcome: data.outcome ?? null,
+      yesPool: data.yesPool ?? 0,
+      noPool: data.noPool ?? 0,
+      closesAt: data.closesAt?.toDate?.()?.toISOString() ?? null,
+      createdAt: data.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+      resolvedAt: data.resolvedAt?.toDate?.()?.toISOString() ?? null,
+      imageUrl: data.imageUrl ?? null,
+      tags: data.tags ?? [],
+    });
+  } catch (err) {
+    req.log.error({ err }, "adminPatchMarket error");
+    res.status(503).json({ error: "Service unavailable" });
+  }
+});
+
+router.delete("/admin/markets/:id", requireAdmin, async (req, res) => {
+  try {
+    const db = getFirestore();
+    const ref = db.collection("markets").doc(req.params.id);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      res.status(404).json({ error: "Market not found" });
+      return;
+    }
+
+    await ref.delete();
+    res.status(204).send();
+  } catch (err) {
+    req.log.error({ err }, "adminDeleteMarket error");
     res.status(503).json({ error: "Service unavailable" });
   }
 });
@@ -90,8 +199,8 @@ router.post("/admin/markets/:id/resolve", requireAdmin, async (req, res) => {
 
         const userRef = db.collection("users").doc(bet.userId);
         batch.update(userRef, {
-          walletBalance: (bet.walletBalance ?? 0) + payout,
-          totalWon: (bet.totalWon ?? 0) + 1,
+          walletBalance: FieldValue.increment(payout),
+          totalWon: FieldValue.increment(1),
         });
       }
 

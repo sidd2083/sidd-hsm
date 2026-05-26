@@ -47,11 +47,16 @@ export function requireAdmin(
   res: Response,
   next: NextFunction,
 ): void {
+  const adminUser = process.env.ADMIN_USERNAME;
+  const adminPass = process.env.ADMIN_PASSWORD;
+
+  if (!adminUser || !adminPass) {
+    res.status(503).json({ error: "Admin credentials not configured on server" });
+    return;
+  }
+
   const username = req.headers["x-admin-username"] as string | undefined;
   const password = req.headers["x-admin-password"] as string | undefined;
-
-  const adminUser = process.env.ADMIN_USERNAME ?? "admin";
-  const adminPass = process.env.ADMIN_PASSWORD ?? "predichsm2025";
 
   if (username !== adminUser || password !== adminPass) {
     res.status(401).json({ error: "Admin unauthorized" });

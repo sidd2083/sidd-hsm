@@ -80,13 +80,13 @@ export default function Portfolio() {
                 return (
                   <div key={bet.id} className="grid grid-cols-3 items-center px-5 py-4 hover:bg-muted/30 transition-colors">
                     <div className="min-w-0 pr-4">
-                      <p className="text-sm font-medium leading-snug line-clamp-2">{bet.marketQuestion ?? "Market"}</p>
+                      <p className="text-sm font-medium leading-snug line-clamp-2">{bet.marketTitle ?? "Market"}</p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <span className={cn(
                           "text-xs font-bold px-1.5 py-0.5 rounded",
-                          bet.type === "YES" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
+                          bet.side === "YES" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
                         )}>
-                          {bet.type}
+                          {bet.side}
                         </span>
                         <span className="text-xs text-muted-foreground font-mono">{formatCurrency(bet.amountPaid)}</span>
                       </div>

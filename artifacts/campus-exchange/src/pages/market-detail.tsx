@@ -48,7 +48,7 @@ function BetPanel({ marketId, isLocked, yesPool, noPool }: {
     if (me && numAmount > me.walletBalance) { toast.error("Insufficient balance"); return; }
 
     placeBet.mutate(
-      { data: { marketId, type: side, amountPaid: numAmount } },
+      { id: marketId, data: { side, amount: numAmount } },
       {
         onSuccess: () => {
           toast.success(`Bet placed on ${side}!`);
@@ -229,8 +229,8 @@ function BetPanel({ marketId, isLocked, yesPool, noPool }: {
   );
 }
 
-function timeLeft(lockTimestamp: number): string {
-  const diff = lockTimestamp - Date.now();
+function timeLeft(closesAtMs: number): string {
+  const diff = closesAtMs - Date.now();
   if (diff <= 0) return "Closed";
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
@@ -283,7 +283,8 @@ export default function MarketDetail() {
     market.noPool
   );
   const noPercentage = 100 - yesPercentage;
-  const isLocked = market.status !== "active" || Date.now() >= market.lockTimestamp;
+  const closesAtMs = market.closesAt ? new Date(market.closesAt).getTime() : Infinity;
+  const isLocked = market.status !== "open" || Date.now() >= closesAtMs;
   const isResolved = market.status === "resolved";
 
   return (
@@ -326,24 +327,24 @@ export default function MarketDetail() {
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-full">
-                      <Clock className="w-3.5 h-3.5" /> {timeLeft(market.lockTimestamp)}
+                      <Clock className="w-3.5 h-3.5" /> {timeLeft(closesAtMs)}
                     </span>
                   )}
                 </div>
 
-                {/* Question */}
-                <h1 className="text-xl font-black text-gray-900 leading-snug tracking-tight">{market.question}</h1>
+                {/* Title */}
+                <h1 className="text-xl font-black text-gray-900 leading-snug tracking-tight">{market.title}</h1>
 
                 {/* Resolved outcome */}
-                {isResolved && market.winningOutcome && (
+                {isResolved && market.outcome && (
                   <div className={cn(
                     "flex items-center gap-2.5 p-4 rounded-xl font-bold",
-                    market.winningOutcome === "YES"
+                    market.outcome === "YES"
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : "bg-rose-50 text-rose-700 border border-rose-200"
                   )}>
                     <CheckCircle className="w-5 h-5" />
-                    Outcome: <span className="text-lg">{market.winningOutcome}</span>
+                    Outcome: <span className="text-lg">{market.outcome}</span>
                   </div>
                 )}
 
@@ -405,14 +406,14 @@ export default function MarketDetail() {
                       <div className="flex items-center gap-2.5">
                         <span className={cn(
                           "text-xs font-black px-2.5 py-1 rounded-lg",
-                          bet.type === "YES"
+                          bet.side === "YES"
                             ? "bg-emerald-100 text-emerald-700"
                             : "bg-rose-100 text-rose-700"
                         )}>
-                          {bet.type}
+                          {bet.side}
                         </span>
                         <span className="text-xs text-gray-400 font-medium">
-                          {new Date(bet.createdAt as number).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+                          {new Date(bet.placedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
                         </span>
                       </div>
                       <span className="font-mono text-sm font-bold text-gray-700">{formatCurrency(bet.amountPaid)}</span>
