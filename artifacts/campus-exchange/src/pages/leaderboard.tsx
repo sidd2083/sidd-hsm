@@ -3,7 +3,7 @@ import { Layout } from "@/components/layout";
 import { useState } from "react";
 import { formatCurrency } from "@/lib/market-math";
 import { cn } from "@/lib/utils";
-import { Crown, TrendingUp, TrendingDown, Trophy, AlertTriangle } from "lucide-react";
+import { Crown, TrendingUp, BarChart2, Trophy, AlertTriangle } from "lucide-react";
 
 export default function Leaderboard() {
   const [period, setPeriod] = useState<GetLeaderboardPeriod>("all-time");
@@ -11,23 +11,27 @@ export default function Leaderboard() {
 
   const { data: rawLeaderboard, isLoading, isError } = useGetLeaderboard({ period, sort });
 
-  // Guard against non-array responses (e.g. {error: "..."} when server is starting up)
   const leaderboard = Array.isArray(rawLeaderboard) ? rawLeaderboard : [];
 
   const topThree = leaderboard.slice(0, 3);
   const rest     = leaderboard.slice(3);
 
-  const SORT_OPTS = [
-    { value: "richest", label: "Richest" },
-    { value: "profit",  label: "Profit"  },
-    { value: "loss",    label: "Loss"    },
-  ] as const;
+  const PERIOD_OPTS: { value: GetLeaderboardPeriod; label: string }[] = [
+    { value: "weekly",   label: "Weekly"   },
+    { value: "monthly",  label: "Monthly"  },
+    { value: "all-time", label: "All Time" },
+  ];
+
+  const SORT_OPTS: { value: GetLeaderboardSort; label: string }[] = [
+    { value: "richest",   label: "Richest"   },
+    { value: "most-won",  label: "Most Won"  },
+    { value: "most-bets", label: "Most Bets" },
+  ];
 
   return (
     <Layout>
       <div className="max-w-2xl mx-auto space-y-8 py-2">
 
-        {/* Heading */}
         <div className="flex items-end justify-between gap-4">
           <div>
             <h1 className="text-4xl font-black text-gray-900 tracking-tight">Leaderboard</h1>
@@ -36,21 +40,20 @@ export default function Leaderboard() {
           <Trophy className="w-10 h-10 text-amber-400 shrink-0 mb-1" />
         </div>
 
-        {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 card-shadow">
-            {(["daily", "weekly", "all-time"] as GetLeaderboardPeriod[]).map((p) => (
+            {PERIOD_OPTS.map((p) => (
               <button
-                key={p}
-                onClick={() => setPeriod(p)}
+                key={p.value}
+                onClick={() => setPeriod(p.value)}
                 className={cn(
-                  "px-4 py-2 text-sm font-semibold rounded-lg transition-all capitalize",
-                  period === p
+                  "px-4 py-2 text-sm font-semibold rounded-lg transition-all",
+                  period === p.value
                     ? "bg-slate-900 text-white shadow-sm"
                     : "text-gray-500 hover:text-gray-800"
                 )}
               >
-                {p === "all-time" ? "All Time" : p.charAt(0).toUpperCase() + p.slice(1)}
+                {p.label}
               </button>
             ))}
           </div>
@@ -59,7 +62,7 @@ export default function Leaderboard() {
             {SORT_OPTS.map((s) => (
               <button
                 key={s.value}
-                onClick={() => setSort(s.value as GetLeaderboardSort)}
+                onClick={() => setSort(s.value)}
                 className={cn(
                   "px-4 py-2 text-sm font-semibold rounded-lg transition-all",
                   sort === s.value
@@ -95,7 +98,6 @@ export default function Leaderboard() {
           </div>
         ) : (
           <>
-            {/* Top 3 podium — only when there are at least 3 entries */}
             {topThree.length >= 3 && (
               <div className="grid grid-cols-3 gap-4">
                 {[1, 0, 2].map((dataIdx) => {
@@ -126,7 +128,9 @@ export default function Leaderboard() {
                       <p className="text-sm font-bold text-gray-900 truncate w-full leading-tight">
                         {entry.displayName}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5 truncate w-full">{entry.academicStream}</p>
+                      <p className="text-xs text-gray-400 mt-0.5 truncate w-full">
+                        {entry.username ? `@${entry.username}` : ""}
+                      </p>
                       <p className={cn(
                         "text-sm font-black mt-1",
                         isFirst ? "text-amber-600" : rank === 2 ? "text-gray-500" : "text-orange-600"
@@ -142,7 +146,6 @@ export default function Leaderboard() {
               </div>
             )}
 
-            {/* Full ranked list */}
             <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden card-shadow">
               <div className="divide-y divide-gray-50">
                 {leaderboard.map((entry, index) => {
@@ -165,7 +168,9 @@ export default function Leaderboard() {
 
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-base text-gray-900 truncate">{entry.displayName}</p>
-                        <p className="text-sm text-gray-400">{entry.academicStream}</p>
+                        <p className="text-sm text-gray-400">
+                          {entry.username ? `@${entry.username}` : ""}
+                        </p>
                       </div>
 
                       <div className="text-right shrink-0">
@@ -175,11 +180,11 @@ export default function Leaderboard() {
                         <div className="flex items-center justify-end gap-3 text-xs mt-0.5">
                           <span className="flex items-center gap-0.5 text-emerald-600 font-semibold">
                             <TrendingUp className="w-3 h-3" />
-                            {formatCurrency(entry.totalProfit)}
+                            {entry.totalWon ?? 0} won
                           </span>
-                          <span className="flex items-center gap-0.5 text-rose-500 font-semibold">
-                            <TrendingDown className="w-3 h-3" />
-                            {formatCurrency(entry.totalLoss)}
+                          <span className="flex items-center gap-0.5 text-slate-500 font-semibold">
+                            <BarChart2 className="w-3 h-3" />
+                            {entry.totalBets ?? 0} bets
                           </span>
                         </div>
                       </div>

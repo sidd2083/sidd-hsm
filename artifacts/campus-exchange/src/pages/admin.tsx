@@ -694,7 +694,7 @@ function ManageUsers({ creds }: { creds: { username: string; password: string } 
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-gray-800 text-sm truncate">{user.displayName ?? "Unknown"}</p>
                   <p className="text-xs text-gray-400 truncate">{user.email ?? user.uid}</p>
-                  {user.academicStream && <p className="text-xs text-indigo-600 font-medium mt-0.5">{user.academicStream}</p>}
+                  {user.stream && <p className="text-xs text-indigo-600 font-medium mt-0.5">{user.stream}</p>}
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-base font-extrabold text-emerald-600 font-mono">{formatCurrency(user.walletBalance ?? 0)}</p>
