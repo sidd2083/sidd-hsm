@@ -29,11 +29,12 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading || meLoading) return;
 
-    // On /onboarding: kick out if not logged in, or profile already exists
+    // ── On /onboarding ─────────────────────────────────────────
     if (location.startsWith("/onboarding")) {
       if (!user) { navigate("/"); return; }
+      // Profile already exists → kick back to home
       if (me) {
-        if (user) localStorage.removeItem(`needs_onboarding_${user.uid}`);
+        localStorage.removeItem(`needs_onboarding_${user.uid}`);
         navigate("/");
       }
       return;
@@ -42,15 +43,24 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
     if (!user) return;
     if (isOnSkipPath) return;
 
-    // Method 1: API returned definitive 404 — no profile exists
+    // If we already have a profile, never redirect to onboarding
+    if (me) return;
+
     const errorStatus = error ? (error as { status?: number }).status : null;
+
+    // Server is down / Firebase not configured — don't redirect, profile creation would also fail
+    if (errorStatus === 503) return;
+
+    // Method 1: API returned 404 — profile definitely doesn't exist
     const isProfileNotFound = errorStatus === 404;
 
-    // Method 2: localStorage flag set at sign-in time when Google reports isNewUser
+    // Method 2: localStorage flag set at sign-in when Google reported isNewUser
     const localFlagSet = localStorage.getItem(`needs_onboarding_${user.uid}`) === "true";
 
-    // Method 3: Firebase user was created very recently (within 60 seconds) — reliable new-user signal
-    const createdAt = user.metadata.creationTime ? new Date(user.metadata.creationTime).getTime() : 0;
+    // Method 3: Firebase account created very recently (≤ 60 s)
+    const createdAt = user.metadata.creationTime
+      ? new Date(user.metadata.creationTime).getTime()
+      : 0;
     const isVeryNewUser = createdAt > 0 && Date.now() - createdAt < 60_000;
 
     if (isProfileNotFound || localFlagSet || isVeryNewUser) {
@@ -60,7 +70,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-[3px] border-gray-200 border-t-indigo-600 rounded-full animate-spin" />
           <span className="text-sm text-gray-400 font-medium">Loading Predic HSM…</span>

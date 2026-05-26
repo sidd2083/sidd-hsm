@@ -5,16 +5,23 @@ import { formatCurrency } from "@/lib/market-math";
 import { cn } from "@/lib/utils";
 import { Crown, TrendingUp, TrendingDown, Trophy, AlertTriangle } from "lucide-react";
 
-const MEDAL = ["🥇", "🥈", "🥉"];
-
 export default function Leaderboard() {
   const [period, setPeriod] = useState<GetLeaderboardPeriod>("all-time");
   const [sort,   setSort]   = useState<GetLeaderboardSort>("richest");
 
-  const { data: leaderboard, isLoading, isError } = useGetLeaderboard({ period, sort });
+  const { data: rawLeaderboard, isLoading, isError } = useGetLeaderboard({ period, sort });
 
-  const topThree = leaderboard?.slice(0, 3) ?? [];
-  const rest     = leaderboard?.slice(3) ?? [];
+  // Guard against non-array responses (e.g. {error: "..."} when server is starting up)
+  const leaderboard = Array.isArray(rawLeaderboard) ? rawLeaderboard : [];
+
+  const topThree = leaderboard.slice(0, 3);
+  const rest     = leaderboard.slice(3);
+
+  const SORT_OPTS = [
+    { value: "richest", label: "Richest" },
+    { value: "profit",  label: "Profit"  },
+    { value: "loss",    label: "Loss"    },
+  ] as const;
 
   return (
     <Layout>
@@ -31,7 +38,7 @@ export default function Leaderboard() {
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-xl p-1 card-shadow">
+          <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 card-shadow">
             {(["daily", "weekly", "all-time"] as GetLeaderboardPeriod[]).map((p) => (
               <button
                 key={p}
@@ -48,12 +55,8 @@ export default function Leaderboard() {
             ))}
           </div>
 
-          <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-xl p-1 card-shadow">
-            {[
-              { value: "richest", label: "💰 Richest" },
-              { value: "profit",  label: "📈 Profit"  },
-              { value: "loss",    label: "📉 Loss"    },
-            ].map((s) => (
+          <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 card-shadow">
+            {SORT_OPTS.map((s) => (
               <button
                 key={s.value}
                 onClick={() => setSort(s.value as GetLeaderboardSort)}
@@ -84,21 +87,23 @@ export default function Leaderboard() {
               The database is being set up. Check back soon.
             </p>
           </div>
-        ) : !leaderboard?.length ? (
+        ) : leaderboard.length === 0 ? (
           <div className="text-center py-20 bg-white border border-gray-200 rounded-2xl card-shadow">
-            <div className="text-5xl mb-4">🏜️</div>
+            <Trophy className="w-12 h-12 text-amber-300 mx-auto mb-4" />
             <p className="text-xl font-bold text-gray-700">No rankings yet</p>
             <p className="text-base text-gray-400 mt-2">Be the first to place a bet!</p>
           </div>
         ) : (
           <>
-            {/* Top 3 podium */}
+            {/* Top 3 podium — only when there are at least 3 entries */}
             {topThree.length >= 3 && (
               <div className="grid grid-cols-3 gap-4">
-                {[1, 0, 2].map((dataIdx, podiumIdx) => {
+                {[1, 0, 2].map((dataIdx) => {
                   const entry = topThree[dataIdx];
+                  if (!entry) return null;
                   const rank = dataIdx + 1;
                   const isFirst = rank === 1;
+                  const medals = ["#1", "#2", "#3"];
                   return (
                     <div
                       key={entry.uid}
@@ -112,15 +117,22 @@ export default function Leaderboard() {
                       {isFirst && <Crown className="w-5 h-5 text-amber-400 mb-2" />}
                       <div className={cn(
                         "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg mb-3 border-2",
-                        isFirst  ? "bg-amber-100 text-amber-700 border-amber-200" :
-                        rank === 2 ? "bg-slate-100 text-slate-600 border-slate-200" :
-                        "bg-orange-100 text-orange-700 border-orange-200"
+                        isFirst     ? "bg-amber-100 text-amber-700 border-amber-200"  :
+                        rank === 2  ? "bg-slate-100 text-slate-600 border-slate-200" :
+                                      "bg-orange-100 text-orange-700 border-orange-200"
                       )}>
                         {entry.displayName?.[0]?.toUpperCase() ?? "?"}
                       </div>
-                      <p className="text-sm font-bold text-gray-900 truncate w-full leading-tight">{entry.displayName}</p>
+                      <p className="text-sm font-bold text-gray-900 truncate w-full leading-tight">
+                        {entry.displayName}
+                      </p>
                       <p className="text-xs text-gray-400 mt-0.5 truncate w-full">{entry.academicStream}</p>
-                      <p className="text-xl mt-1">{MEDAL[dataIdx]}</p>
+                      <p className={cn(
+                        "text-sm font-black mt-1",
+                        isFirst ? "text-amber-600" : rank === 2 ? "text-gray-500" : "text-orange-600"
+                      )}>
+                        {medals[dataIdx]}
+                      </p>
                       <p className="font-mono font-black text-sm mt-1.5 text-emerald-600">
                         {formatCurrency(entry.walletBalance)}
                       </p>
@@ -130,7 +142,7 @@ export default function Leaderboard() {
               </div>
             )}
 
-            {/* Full list */}
+            {/* Full ranked list */}
             <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden card-shadow">
               <div className="divide-y divide-gray-50">
                 {leaderboard.map((entry, index) => {
@@ -139,7 +151,10 @@ export default function Leaderboard() {
                     index === 1 ? "text-gray-400"  :
                     index === 2 ? "text-orange-400" : "text-gray-300";
                   return (
-                    <div key={entry.uid} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50/70 transition-colors">
+                    <div
+                      key={entry.uid}
+                      className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50/70 transition-colors"
+                    >
                       <span className={cn("w-7 text-center font-black text-sm font-mono shrink-0", rankColor)}>
                         #{entry.rank || index + 1}
                       </span>
@@ -154,7 +169,9 @@ export default function Leaderboard() {
                       </div>
 
                       <div className="text-right shrink-0">
-                        <p className="font-mono font-black text-base text-gray-900">{formatCurrency(entry.walletBalance)}</p>
+                        <p className="font-mono font-black text-base text-gray-900">
+                          {formatCurrency(entry.walletBalance)}
+                        </p>
                         <div className="flex items-center justify-end gap-3 text-xs mt-0.5">
                           <span className="flex items-center gap-0.5 text-emerald-600 font-semibold">
                             <TrendingUp className="w-3 h-3" />

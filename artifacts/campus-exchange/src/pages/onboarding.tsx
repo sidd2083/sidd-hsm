@@ -7,18 +7,19 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle, ChevronRight, TrendingUp } from "lucide-react";
+import { PredicLogo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 
 const STREAMS = [
-  { value: "Class 11 - Science", label: "Class 11 — Science" },
+  { value: "Class 11 - Science",    label: "Class 11 — Science" },
   { value: "Class 11 - Management", label: "Class 11 — Management" },
-  { value: "Class 12 - Science", label: "Class 12 — Science" },
+  { value: "Class 12 - Science",    label: "Class 12 — Science" },
   { value: "Class 12 - Management", label: "Class 12 — Management" },
-  { value: "Bachelor", label: "Bachelor (BBA / BCA)" },
+  { value: "Bachelor",              label: "Bachelor (BBA / BCA)" },
 ];
 
 const schema = z.object({
-  displayName: z.string().min(2, "Name must be at least 2 characters"),
+  displayName:    z.string().min(2, "Name must be at least 2 characters"),
   academicStream: z.enum([
     "Class 11 - Science",
     "Class 11 - Management",
@@ -75,9 +76,9 @@ function AnimatedCounter({ target }: { target: number }) {
     const duration = 1600;
     const startTime = performance.now();
     const step = (now: number) => {
-      const elapsed = now - startTime;
+      const elapsed  = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased    = 1 - Math.pow(1 - progress, 3);
       setCount(Math.floor(eased * target));
       if (progress < 1) requestAnimationFrame(step);
     };
@@ -99,6 +100,12 @@ function AnimatedCounter({ target }: { target: number }) {
 
 /* ─── Welcome modal ─── */
 function WelcomeModal({ name, onClose }: { name: string; onClose: () => void }) {
+  const quickStats = [
+    { label: "Bet on markets",   icon: TrendingUp },
+    { label: "Win leaderboard",  icon: CheckCircle },
+    { label: "+₹100 daily",      icon: ChevronRight },
+  ];
+
   return (
     <>
       <style>{`
@@ -116,14 +123,16 @@ function WelcomeModal({ name, onClose }: { name: string; onClose: () => void }) 
           0%,100% { transform: translateY(0); }
           50%      { transform: translateY(-8px); }
         }
-        .modal-pop { animation: modalPop 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        .modal-pop    { animation: modalPop 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards; }
         .badge-bounce { animation: badgeBounce 1.2s ease-in-out 0.5s infinite; }
       `}</style>
       <Confetti />
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
         <div className="modal-pop bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
           <div className="badge-bounce inline-flex items-center justify-center w-20 h-20 rounded-full bg-indigo-100 mb-5">
-            <span className="text-4xl">🎉</span>
+            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center">
+              <PredicLogo size={20} />
+            </div>
           </div>
 
           <h2 className="text-2xl font-black text-gray-900 mb-1">
@@ -142,14 +151,12 @@ function WelcomeModal({ name, onClose }: { name: string; onClose: () => void }) 
           </div>
 
           <div className="grid grid-cols-3 gap-2 mb-6 text-center">
-            {[
-              { icon: "📈", label: "Bet on markets" },
-              { icon: "🏆", label: "Win the board" },
-              { icon: "💰", label: "₹100 daily bonus" },
-            ].map((item) => (
+            {quickStats.map((item) => (
               <div key={item.label} className="bg-slate-50 rounded-xl py-3 px-1">
-                <div className="text-xl mb-1">{item.icon}</div>
-                <p className="text-[10px] font-semibold text-gray-500">{item.label}</p>
+                <div className="flex items-center justify-center mb-1.5">
+                  <item.icon className="w-4 h-4 text-indigo-500" />
+                </div>
+                <p className="text-[10px] font-semibold text-gray-500 leading-tight">{item.label}</p>
               </div>
             ))}
           </div>
@@ -170,7 +177,7 @@ function WelcomeModal({ name, onClose }: { name: string; onClose: () => void }) 
 export default function Onboarding() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
-  const queryClient = useQueryClient();
+  const queryClient  = useQueryClient();
   const createProfile = useCreateProfile();
   const [step, setStep] = useState<1 | 2>(1);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -187,7 +194,7 @@ export default function Onboarding() {
     defaultValues: { displayName: user?.displayName ?? "", terms: false },
   });
 
-  const displayName = watch("displayName");
+  const displayName    = watch("displayName");
   const academicStream = watch("academicStream");
 
   useEffect(() => {
@@ -222,51 +229,59 @@ export default function Onboarding() {
       )}
 
       <div className="min-h-screen bg-slate-50 flex">
-        {/* Left panel */}
-        <div className="hidden lg:flex flex-col justify-between w-[380px] bg-slate-900 p-12 text-white shrink-0 relative overflow-hidden">
+        {/* ── Left branding panel ── */}
+        <div className="hidden lg:flex flex-col w-[380px] bg-slate-900 shrink-0 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950" />
           <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-indigo-500/10" />
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-12">
-              <div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center">
-                <span className="text-white font-black text-base">P</span>
+          <div className="relative z-10 flex flex-col flex-1 p-12">
+            <div className="flex items-center gap-3 mb-14">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <PredicLogo size={18} />
               </div>
-              <span className="font-bold text-[16px]">Predic HSM</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-black text-[17px] text-white tracking-tight">Predic</span>
+                <span className="font-black text-[17px] text-indigo-400 tracking-tight">HSM</span>
+              </div>
             </div>
-            <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-4">HSM College</p>
-            <h2 className="text-3xl font-black leading-tight">
-              Predict.<br />Compete.<br />
-              <span className="text-indigo-400">Win.</span>
-            </h2>
-            <p className="text-slate-400 text-[14px] leading-relaxed mt-4 max-w-[260px]">
-              Trade virtual currency on college and national events. Zero real money, all the fun.
-            </p>
-          </div>
 
-          <div className="relative z-10 divide-y divide-slate-800">
-            {[
-              "₹1,00,000 starting balance",
-              "₹100 daily bonus",
-              "100% virtual — no real money",
-            ].map((item) => (
-              <div key={item} className="flex items-center gap-3 py-3.5 text-slate-300 text-[14px]">
-                <CheckCircle className="w-4 h-4 text-indigo-400 shrink-0" />
-                {item}
-              </div>
-            ))}
+            <div className="flex-1">
+              <p className="text-indigo-400 text-[11px] font-bold uppercase tracking-[0.18em] mb-5">HSM College</p>
+              <h2 className="text-3xl font-black text-white leading-tight mb-4">
+                Predict.<br />Compete.<br />
+                <span className="text-indigo-400">Win.</span>
+              </h2>
+              <p className="text-slate-400 text-[14px] leading-relaxed max-w-[260px]">
+                Trade virtual currency on college and national events. Zero real money, all the fun.
+              </p>
+            </div>
+
+            <div className="border-t border-slate-800 pt-6 space-y-0">
+              {[
+                "₹1,00,000 starting balance",
+                "₹100 daily bonus",
+                "100% virtual — no real money",
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-3 py-3.5 text-slate-300 text-[14px]">
+                  <CheckCircle className="w-4 h-4 text-indigo-400 shrink-0" />
+                  {item}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Right panel */}
+        {/* ── Right form panel ── */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
           <div className="w-full max-w-[400px]">
             {/* Mobile logo */}
             <div className="lg:hidden flex items-center gap-2.5 mb-8">
               <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center">
-                <span className="text-white font-black text-sm">P</span>
+                <PredicLogo size={16} />
               </div>
-              <span className="font-bold text-[15px] text-gray-900">Predic <span className="text-indigo-600">HSM</span></span>
+              <span className="font-bold text-[15px] text-gray-900">
+                Predic <span className="text-indigo-600">HSM</span>
+              </span>
             </div>
 
             {/* Step indicator */}
@@ -282,7 +297,9 @@ export default function Onboarding() {
                 {step === 1 ? "Set up your profile" : "Claim your ₹1,00,000"}
               </h1>
               <p className="text-[14px] text-gray-500 mt-1">
-                {step === 1 ? "Tell us about yourself to personalise your experience." : "Review and confirm to start trading."}
+                {step === 1
+                  ? "Tell us about yourself to personalise your experience."
+                  : "Review and confirm to start trading."}
               </p>
             </div>
 
@@ -301,7 +318,9 @@ export default function Onboarding() {
                         errors.displayName ? "border-red-400" : "border-gray-200"
                       )}
                     />
-                    {errors.displayName && <p className="text-[12px] text-red-500">{errors.displayName.message}</p>}
+                    {errors.displayName && (
+                      <p className="text-[12px] text-red-500">{errors.displayName.message}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -324,13 +343,17 @@ export default function Onboarding() {
                               )}
                             >
                               {s.label}
-                              {field.value === s.value && <CheckCircle className="w-4 h-4 text-indigo-400 shrink-0" />}
+                              {field.value === s.value && (
+                                <CheckCircle className="w-4 h-4 text-indigo-400 shrink-0" />
+                              )}
                             </button>
                           ))}
                         </div>
                       )}
                     />
-                    {errors.academicStream && <p className="text-[12px] text-red-500">{errors.academicStream.message}</p>}
+                    {errors.academicStream && (
+                      <p className="text-[12px] text-red-500">{errors.academicStream.message}</p>
+                    )}
                   </div>
 
                   <button
@@ -352,7 +375,7 @@ export default function Onboarding() {
                   {/* Balance preview */}
                   <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl p-6 text-center relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10">
-                      <div className="absolute top-2 right-4 text-[60px] leading-none">₹</div>
+                      <div className="absolute top-2 right-4 text-[60px] leading-none select-none">₹</div>
                     </div>
                     <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-300 mb-2">Your Welcome Gift</p>
                     <p className="text-4xl font-black text-white tracking-tight">₹1,00,000</p>
@@ -376,16 +399,20 @@ export default function Onboarding() {
                         </button>
                         <span className="text-[13px] text-gray-600 leading-relaxed">
                           I understand this is virtual currency only. No real money. I accept the{" "}
-                          <a href="/terms" target="_blank" className="text-indigo-600 font-semibold underline underline-offset-2">Terms & Conditions</a>.
+                          <a href="/terms" target="_blank" className="text-indigo-600 font-semibold underline underline-offset-2">
+                            Terms & Conditions
+                          </a>.
                         </span>
                       </label>
                     )}
                   />
-                  {errors.terms && <p className="text-[12px] text-red-500">{errors.terms.message}</p>}
+                  {errors.terms && (
+                    <p className="text-[12px] text-red-500">{errors.terms.message}</p>
+                  )}
 
                   {createProfile.isError && (
                     <p className="text-[13px] text-red-500 bg-red-50 rounded-xl px-4 py-3 text-center border border-red-100">
-                      Failed to create profile. Make sure you're connected and try again.
+                      Failed to create profile. The server needs to be configured first — ask the admin.
                     </p>
                   )}
 
