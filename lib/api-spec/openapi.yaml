@@ -3,13 +3,23 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Predic HSM API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: users
+    description: User profile operations
+  - name: markets
+    description: Market operations
+  - name: bets
+    description: Bet operations
+  - name: leaderboard
+    description: Leaderboard operations
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
@@ -24,7 +34,317 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /users/me:
+    get:
+      operationId: getMe
+      tags: [users]
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          description: Profile not found
+        "503":
+          description: Service unavailable
+
+    patch:
+      operationId: updateProfile
+      tags: [users]
+      summary: Update current user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/me/profile:
+    post:
+      operationId: createProfile
+      tags: [users]
+      summary: Create a user profile (onboarding)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "201":
+          description: Profile created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/me/daily-bonus:
+    post:
+      operationId: claimDailyBonus
+      tags: [users]
+      summary: Claim daily bonus
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Daily bonus result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyBonusResult"
+
+  /markets:
+    get:
+      operationId: listMarkets
+      tags: [markets]
+      summary: List all markets
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of markets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Market"
+
+  /markets/{id}:
+    get:
+      operationId: getMarket
+      tags: [markets]
+      summary: Get a single market
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Market
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Market"
+        "404":
+          description: Market not found
+
+  /markets/{id}/bets:
+    get:
+      operationId: getMarketBets
+      tags: [bets]
+      summary: Get bets for a market
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of bets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bet"
+
+    post:
+      operationId: placeBet
+      tags: [bets]
+      summary: Place a bet on a market
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BetInput"
+      responses:
+        "201":
+          description: Bet placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bet"
+
+  /bets/my:
+    get:
+      operationId: listMyBets
+      tags: [bets]
+      summary: List bets for current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User bets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bet"
+
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [leaderboard]
+      summary: Get leaderboard
+      parameters:
+        - name: period
+          in: query
+          schema:
+            $ref: "#/components/schemas/GetLeaderboardPeriod"
+        - name: sort
+          in: query
+          schema:
+            $ref: "#/components/schemas/GetLeaderboardSort"
+      responses:
+        "200":
+          description: Leaderboard entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
+  /admin/markets:
+    post:
+      operationId: adminCreateMarket
+      tags: [admin]
+      summary: Admin - create a market
+      security:
+        - adminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketInput"
+      responses:
+        "201":
+          description: Market created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Market"
+
+  /admin/markets/{id}/resolve:
+    post:
+      operationId: adminResolveMarket
+      tags: [admin]
+      summary: Admin - resolve a market
+      security:
+        - adminAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketResolveInput"
+      responses:
+        "200":
+          description: Market resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Market"
+
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      summary: Admin - list all users
+      security:
+        - adminAuth: []
+      responses:
+        "200":
+          description: All users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProfile"
+
+  /admin/users/{id}/wallet:
+    post:
+      operationId: adminAdjustWallet
+      tags: [admin]
+      summary: Admin - adjust user wallet
+      security:
+        - adminAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletAdjustInput"
+      responses:
+        "200":
+          description: Wallet adjusted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+    adminAuth:
+      type: apiKey
+      in: header
+      name: x-admin-username
+
   schemas:
     HealthStatus:
       type: object
@@ -34,3 +354,231 @@ components:
       required:
         - status
 
+    UserProfile:
+      type: object
+      properties:
+        uid:
+          type: string
+        displayName:
+          type: string
+        email:
+          type: string
+        photoURL:
+          type: ["string", "null"]
+        walletBalance:
+          type: number
+        stream:
+          type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        lastDailyBonus:
+          type: ["string", "null"]
+        totalBets:
+          type: integer
+        totalWon:
+          type: integer
+      required:
+        - uid
+        - displayName
+        - email
+        - walletBalance
+
+    ProfileInput:
+      type: object
+      properties:
+        displayName:
+          type: string
+        stream:
+          type: string
+        username:
+          type: string
+      required:
+        - displayName
+
+    ProfileUpdate:
+      type: object
+      properties:
+        displayName:
+          type: string
+        stream:
+          type: string
+        username:
+          type: string
+
+    DailyBonusResult:
+      type: object
+      properties:
+        claimed:
+          type: boolean
+        bonus:
+          type: ["number", "null"]
+        nextClaimAt:
+          type: ["string", "null"]
+        message:
+          type: string
+      required:
+        - claimed
+        - message
+
+    Market:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+          enum: ["open", "locked", "resolved"]
+        outcome:
+          type: ["string", "null"]
+        yesPool:
+          type: number
+        noPool:
+          type: number
+        closesAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        resolvedAt:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - title
+        - description
+        - category
+        - status
+        - yesPool
+        - noPool
+        - createdAt
+
+    MarketInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        closesAt:
+          type: string
+        imageUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+      required:
+        - title
+        - description
+        - category
+
+    MarketResolveInput:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum: ["YES", "NO"]
+      required:
+        - outcome
+
+    Bet:
+      type: object
+      properties:
+        id:
+          type: string
+        marketId:
+          type: string
+        marketTitle:
+          type: string
+        userId:
+          type: string
+        side:
+          type: string
+          enum: ["YES", "NO"]
+        amountPaid:
+          type: number
+        sharesOwned:
+          type: number
+        status:
+          type: string
+          enum: ["active", "locked", "won", "lost"]
+        payout:
+          type: ["number", "null"]
+        placedAt:
+          type: string
+      required:
+        - id
+        - marketId
+        - userId
+        - side
+        - amountPaid
+        - sharesOwned
+        - status
+        - placedAt
+
+    BetInput:
+      type: object
+      properties:
+        side:
+          type: string
+          enum: ["YES", "NO"]
+        amount:
+          type: number
+      required:
+        - side
+        - amount
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        uid:
+          type: string
+        displayName:
+          type: string
+        username:
+          type: ["string", "null"]
+        walletBalance:
+          type: number
+        totalWon:
+          type: integer
+        totalBets:
+          type: integer
+        rank:
+          type: integer
+      required:
+        - uid
+        - displayName
+        - walletBalance
+        - rank
+
+    GetLeaderboardPeriod:
+      type: string
+      enum: ["all-time", "weekly", "monthly"]
+
+    GetLeaderboardSort:
+      type: string
+      enum: ["richest", "most-bets", "most-won"]
+
+    WalletAdjustInput:
+      type: object
+      properties:
+        amount:
+          type: number
+        reason:
+          type: string
+      required:
+        - amount

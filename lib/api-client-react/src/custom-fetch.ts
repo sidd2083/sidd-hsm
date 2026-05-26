@@ -17,6 +17,8 @@ const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
 
 let _baseUrl: string | null = null;
 let _authTokenGetter: AuthTokenGetter | null = null;
+let _adminUsername: string | null = null;
+let _adminPassword: string | null = null;
 
 /**
  * Set a base URL that is prepended to every relative request URL
@@ -42,6 +44,19 @@ export function setBaseUrl(url: string | null): void {
  */
 export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
+}
+
+/**
+ * Set admin credentials for admin-gated API calls.
+ * Pass `null, null` to clear credentials.
+ */
+export function setAdminCredentials(username: string | null, password: string | null): void {
+  _adminUsername = username;
+  _adminPassword = password;
+}
+
+export function getAdminCredentials(): { username: string | null; password: string | null } {
+  return { username: _adminUsername, password: _adminPassword };
 }
 
 function isRequest(input: RequestInfo | URL): input is Request {
