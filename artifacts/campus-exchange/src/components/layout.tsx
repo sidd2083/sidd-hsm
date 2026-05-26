@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   ChevronDown, LogOut, Wallet, BarChart2,
-  Trophy, Home, User, TrendingUp, Flame,
+  Trophy, Home, User, TrendingUp, Flame, Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -133,7 +133,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2.5 h-9 px-3 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors outline-none">
                     <div className="w-6 h-6 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-xs font-black shrink-0">
-                      {me.displayName?.[0]?.toUpperCase() ?? "U"}
+                      {me.displayName?.[0]?.toUpperCase() ?? <User className="w-3.5 h-3.5" />}
                     </div>
                     <span className="hidden sm:block text-sm font-semibold text-slate-200 max-w-[100px] truncate">
                       {me.displayName?.split(" ")[0]}
@@ -154,9 +154,10 @@ export function Header() {
                   </div>
 
                   {[
-                    { href: "/wallet",    icon: Wallet,   label: "Wallet",      color: "text-emerald-500" },
-                    { href: "/portfolio", icon: BarChart2, label: "Portfolio",   color: "text-indigo-500" },
-                    { href: "/leaderboard", icon: Trophy, label: "Leaderboard", color: "text-amber-500" },
+                    { href: "/wallet",      icon: Wallet,    label: "Wallet",      color: "text-emerald-500" },
+                    { href: "/portfolio",   icon: BarChart2, label: "Portfolio",   color: "text-indigo-500" },
+                    { href: "/leaderboard", icon: Trophy,    label: "Leaderboard", color: "text-amber-500" },
+                    { href: "/settings",    icon: Settings,  label: "Settings",    color: "text-slate-500" },
                   ].map((item) => (
                     <DropdownMenuItem key={item.href} asChild>
                       <Link href={item.href} className="cursor-pointer flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
