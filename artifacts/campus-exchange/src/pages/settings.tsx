@@ -21,14 +21,14 @@ export default function Settings() {
   const { data: me, isLoading } = useGetMe({ query: { queryKey: getGetMeQueryKey() } });
   const updateProfile = useUpdateProfile();
 
-  const [form, setForm] = useState({ displayName: "", academicStream: "" });
+  const [form, setForm] = useState({ displayName: "", stream: "" });
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (me) {
       setForm({
         displayName: me.displayName ?? "",
-        academicStream: me.academicStream ?? "",
+        stream: me.stream ?? "",
       });
     }
   }, [me]);
@@ -36,7 +36,7 @@ export default function Settings() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfile.mutate(
-      { data: { displayName: form.displayName, academicStream: form.academicStream as never, section: "" } },
+      { data: { displayName: form.displayName, stream: form.stream } },
       {
         onSuccess: () => {
           toast.success("Profile saved successfully");
@@ -84,8 +84,8 @@ export default function Settings() {
               <div className="space-y-1.5">
                 <label className="text-[13px] font-medium text-gray-600">Academic Stream</label>
                 <select
-                  value={form.academicStream}
-                  onChange={(e) => setForm((f) => ({ ...f, academicStream: e.target.value }))}
+                  value={form.stream}
+                  onChange={(e) => setForm((f) => ({ ...f, stream: e.target.value }))}
                   className="w-full h-10 px-3.5 rounded-lg border border-gray-200 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/15 transition-all bg-white appearance-none"
                 >
                   <option value="">Select your stream</option>

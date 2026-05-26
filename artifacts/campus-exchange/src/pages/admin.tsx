@@ -30,7 +30,7 @@ class AdminFetchError extends Error {
   }
 }
 
-async function adminFetch(path: string, creds: { username: string; password: string }, options: RequestInit = {}) {
+async function adminFetch(path: string, creds: { username: string; password: string }, options: RequestInit = {}): Promise<any> {
   const res = await fetch(`${BASE}/api${path}`, {
     ...options,
     headers: {
@@ -44,7 +44,11 @@ async function adminFetch(path: string, creds: { username: string; password: str
     const body = await res.text();
     throw new AdminFetchError(body, res.status);
   }
-  return res.json();
+  if (res.status === 204 || res.headers.get("content-length") === "0") {
+    return null;
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
 }
 
 export default function Admin() {

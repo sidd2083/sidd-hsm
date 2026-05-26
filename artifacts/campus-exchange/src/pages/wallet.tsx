@@ -125,11 +125,11 @@ export default function Wallet() {
                     <div className="flex items-center gap-2.5 min-w-0">
                       <span className={cn(
                         "shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md",
-                        bet.type === "YES" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
+                        bet.side === "YES" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
                       )}>
-                        {bet.type}
+                        {bet.side}
                       </span>
-                      <p className="text-sm text-gray-600 truncate">{bet.marketQuestion ?? "Market"}</p>
+                      <p className="text-sm text-gray-600 truncate">{bet.marketTitle ?? "Market"}</p>
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <p className="text-sm font-mono font-semibold text-gray-800">-{formatCurrency(bet.amountPaid)}</p>
