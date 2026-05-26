@@ -5,15 +5,16 @@ import { cn } from "@/lib/utils";
 import { CheckCircle, Clock, Lock, TrendingUp, TrendingDown, BarChart2 } from "lucide-react";
 
 export default function Portfolio() {
-  const { data: bets, isLoading } = useListMyBets({ query: { queryKey: getListMyBetsQueryKey() } });
+  const { data: rawBets, isLoading } = useListMyBets({ query: { queryKey: getListMyBetsQueryKey() } });
+  const bets = Array.isArray(rawBets) ? rawBets : [];
 
-  const totalBets = bets?.length ?? 0;
-  const wonBets = bets?.filter((b) => b.status === "won").length ?? 0;
-  const lostBets = bets?.filter((b) => b.status === "lost").length ?? 0;
-  const activeBets = bets?.filter((b) => b.status === "active" || b.status === "locked").length ?? 0;
-  const totalStaked = bets?.reduce((s, b) => s + b.amountPaid, 0) ?? 0;
-  const totalWon = bets?.filter((b) => b.status === "won").reduce((s, b) => s + (b.payout ?? 0), 0) ?? 0;
-  const netPnl = totalWon - (bets?.filter((b) => b.status === "won" || b.status === "lost").reduce((s, b) => s + b.amountPaid, 0) ?? 0);
+  const totalBets = bets.length;
+  const wonBets = bets.filter((b) => b.status === "won").length;
+  const lostBets = bets.filter((b) => b.status === "lost").length;
+  const activeBets = bets.filter((b) => b.status === "active" || b.status === "locked").length;
+  const totalStaked = bets.reduce((s, b) => s + (b.amountPaid ?? 0), 0);
+  const totalWon = bets.filter((b) => b.status === "won").reduce((s, b) => s + (b.payout ?? 0), 0);
+  const netPnl = totalWon - bets.filter((b) => b.status === "won" || b.status === "lost").reduce((s, b) => s + (b.amountPaid ?? 0), 0);
   const winRate = (wonBets + lostBets) > 0 ? Math.round((wonBets / (wonBets + lostBets)) * 100) : 0;
 
   const STATS = [

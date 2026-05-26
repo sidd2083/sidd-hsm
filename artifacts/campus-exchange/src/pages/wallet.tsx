@@ -15,12 +15,13 @@ import { ArrowDownLeft, ArrowUpRight, Gift, TrendingUp, TrendingDown, BarChart2 
 export default function Wallet() {
   const queryClient = useQueryClient();
   const { data: me, isLoading } = useGetMe({ query: { queryKey: getGetMeQueryKey() } });
-  const { data: bets, isLoading: betsLoading } = useListMyBets({ query: { queryKey: getListMyBetsQueryKey() } });
+  const { data: rawBets, isLoading: betsLoading } = useListMyBets({ query: { queryKey: getListMyBetsQueryKey() } });
+  const bets = Array.isArray(rawBets) ? rawBets : [];
   const claimBonus = useClaimDailyBonus();
 
-  type Bet = NonNullable<typeof bets>[number];
-  const totalStaked = bets?.reduce((s: number, b: Bet) => s + b.amountPaid, 0) ?? 0;
-  const totalWon    = bets?.filter((b: Bet) => b.status === "won").reduce((s: number, b: Bet) => s + (b.payout ?? 0), 0) ?? 0;
+  type Bet = NonNullable<typeof rawBets> extends (infer T)[] ? T : never;
+  const totalStaked = bets.reduce((s: number, b: Bet) => s + (b.amountPaid ?? 0), 0);
+  const totalWon    = bets.filter((b: Bet) => b.status === "won").reduce((s: number, b: Bet) => s + (b.payout ?? 0), 0);
   const netPnl      = totalWon - totalStaked;
 
   const handleClaimBonus = () => {

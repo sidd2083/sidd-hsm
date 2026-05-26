@@ -22,6 +22,14 @@ type Tab = "overview" | "markets" | "create" | "users" | "categories";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
+class AdminFetchError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
 async function adminFetch(path: string, creds: { username: string; password: string }, options: RequestInit = {}) {
   const res = await fetch(`${BASE}/api${path}`, {
     ...options,
@@ -32,7 +40,10 @@ async function adminFetch(path: string, creds: { username: string; password: str
       ...options.headers,
     },
   });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) {
+    const body = await res.text();
+    throw new AdminFetchError(body, res.status);
+  }
   return res.json();
 }
 
@@ -57,13 +68,15 @@ export default function Admin() {
       setCreds(c);
       setIsAuthenticated(true);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes("503") || msg.toLowerCase().includes("firebase")) {
+      const status = err instanceof AdminFetchError ? err.status : 0;
+      if (status === 503) {
         setAuthError("Firebase is not configured yet. Ask the admin to add FIREBASE_SERVICE_ACCOUNT to the server.");
-      } else if (msg.includes("403") || msg.toLowerCase().includes("forbidden")) {
+      } else if (status === 403 || status === 401) {
         setAuthError("Invalid username or password.");
+      } else if (status === 0) {
+        setAuthError("Could not reach the API server. Check that it is running.");
       } else {
-        setAuthError("Could not connect to server. Make sure the API is running.");
+        setAuthError(`Server error (${status}). Please try again.`);
       }
     } finally {
       setAuthLoading(false);

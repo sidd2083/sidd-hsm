@@ -48,20 +48,21 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
 
     const errorStatus = error ? (error as { status?: number }).status : null;
 
-    // Server is down / Firebase not configured — don't redirect, profile creation would also fail
-    if (errorStatus === 503) return;
-
     // Method 1: API returned 404 — profile definitely doesn't exist
     const isProfileNotFound = errorStatus === 404;
 
     // Method 2: localStorage flag set at sign-in when Google reported isNewUser
     const localFlagSet = localStorage.getItem(`needs_onboarding_${user.uid}`) === "true";
 
-    // Method 3: Firebase account created very recently (≤ 60 s)
+    // Method 3: Firebase account created very recently (≤ 90 s)
     const createdAt = user.metadata.creationTime
       ? new Date(user.metadata.creationTime).getTime()
       : 0;
-    const isVeryNewUser = createdAt > 0 && Date.now() - createdAt < 60_000;
+    const isVeryNewUser = createdAt > 0 && Date.now() - createdAt < 90_000;
+
+    // Even if the server is down (503), still redirect new users to onboarding
+    // so they can see the form (profile creation from onboarding will also fail gracefully)
+    if (errorStatus === 503 && !localFlagSet && !isVeryNewUser) return;
 
     if (isProfileNotFound || localFlagSet || isVeryNewUser) {
       navigate("/onboarding");

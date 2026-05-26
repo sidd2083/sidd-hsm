@@ -61,7 +61,7 @@ function MobileBottomNav() {
       {user && me && (
         <div className="flex items-center justify-between px-5 py-2 bg-slate-50 border-b border-gray-100">
           <span className="text-sm text-slate-500 font-medium truncate max-w-[55%]">{me.displayName}</span>
-          <span className="text-sm font-bold text-emerald-600 font-mono">{formatCurrency(me.walletBalance)}</span>
+          <span className="text-sm font-bold text-emerald-600 font-mono">{formatCurrency(me.walletBalance ?? 0)}</span>
         </div>
       )}
       <div className="flex items-stretch safe-pb">
@@ -125,7 +125,7 @@ export function Header() {
               {/* Balance chip */}
               <div className="hidden sm:flex items-center gap-2 h-9 px-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 text-sm font-bold font-mono tracking-tight">
                 <Flame className="w-3.5 h-3.5 text-emerald-400" />
-                {formatCurrency(me.walletBalance)}
+                {formatCurrency(me.walletBalance ?? 0)}
               </div>
 
               {/* User menu */}
@@ -149,7 +149,7 @@ export function Header() {
                     <p className="text-xs text-gray-400 truncate mt-0.5">{me.email}</p>
                     <div className="mt-2 pt-2 border-t border-slate-200">
                       <p className="text-xs text-gray-400">Balance</p>
-                      <p className="text-base font-black text-emerald-600 font-mono mt-0.5">{formatCurrency(me.walletBalance)}</p>
+                      <p className="text-base font-black text-emerald-600 font-mono mt-0.5">{formatCurrency(me.walletBalance ?? 0)}</p>
                     </div>
                   </div>
 
