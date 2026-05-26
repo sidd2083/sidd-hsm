@@ -654,7 +654,7 @@ function ManageUsers({ creds }: { creds: { username: string; password: string } 
     const amount = parseInt(adjustAmount);
     if (isNaN(amount) || amount === 0) { toast.error("Enter a valid amount"); return; }
     adjustWallet.mutate(
-      { uid, data: { amount } },
+      { id: uid, data: { amount } },
       {
         onSuccess: () => {
           toast.success(`Wallet adjusted by ${formatCurrency(amount)}`);

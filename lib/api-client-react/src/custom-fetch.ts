@@ -373,6 +373,12 @@ export async function customFetch<T = unknown>(
     }
   }
 
+  // Attach admin credentials when set.
+  if (_adminUsername && _adminPassword) {
+    headers.set("x-admin-username", _adminUsername);
+    headers.set("x-admin-password", _adminPassword);
+  }
+
   const requestInfo = { method, url: resolveUrl(input) };
 
   const response = await fetch(input, { ...init, method, headers });

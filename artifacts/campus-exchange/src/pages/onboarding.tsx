@@ -204,7 +204,7 @@ export default function Onboarding() {
   const onSubmit = (data: FormData) => {
     setSubmittedName(data.displayName);
     createProfile.mutate(
-      { data: { displayName: data.displayName, academicStream: data.academicStream, section: "" } },
+      { data: { displayName: data.displayName, stream: data.academicStream, username: "" } },
       {
         onSuccess: () => {
           if (user) localStorage.removeItem(`needs_onboarding_${user.uid}`);

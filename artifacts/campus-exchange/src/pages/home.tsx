@@ -46,11 +46,11 @@ export default function Home() {
 
   const filtered = markets.filter(m =>
     searchQuery.trim() === "" ||
-    m.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const activeCount   = markets.filter((m) => m.status === "active").length;
+  const activeCount   = markets.filter((m) => m.status === "open").length;
   const resolvedCount = markets.filter((m) => m.status === "resolved").length;
 
   return (

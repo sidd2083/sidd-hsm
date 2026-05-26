@@ -54,7 +54,7 @@ function StatCard({ icon: Icon, label, value, color }: {
   );
 }
 
-function BetRow({ bet }: { bet: { id: string; marketQuestion?: string | null; type: string; amountPaid: number; status: string; payout?: number | null } }) {
+function BetRow({ bet }: { bet: { id: string; marketTitle?: string | null; side: string; amountPaid: number; status: string; payout?: number | null } }) {
   const isWon = bet.status === "won";
   const isLost = bet.status === "lost";
   const profit = (bet.payout ?? 0) - bet.amountPaid;
@@ -68,12 +68,12 @@ function BetRow({ bet }: { bet: { id: string; marketQuestion?: string | null; ty
     )}>
       <div className={cn(
         "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0",
-        bet.type === "YES" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
+        bet.side === "YES" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
       )}>
-        {bet.type}
+        {bet.side}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{bet.marketQuestion ?? "Unknown market"}</p>
+        <p className="text-sm font-medium truncate">{bet.marketTitle ?? "Unknown market"}</p>
         <div className="flex items-center gap-2 mt-0.5">
           {bet.status === "won" && <span className="flex items-center gap-0.5 text-xs text-emerald-600 font-semibold"><CheckCircle className="w-3 h-3" /> Won</span>}
           {bet.status === "lost" && <span className="flex items-center gap-0.5 text-xs text-rose-500 font-semibold"><X className="w-3 h-3" /> Lost</span>}
@@ -99,20 +99,20 @@ export default function Profile() {
   const claimBonus = useClaimDailyBonus();
 
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ displayName: "", section: "", academicStream: "" });
+  const [form, setForm] = useState({ displayName: "", username: "", stream: "" });
 
   const startEdit = () => {
     setForm({
       displayName: me?.displayName ?? "",
-      section: me?.section ?? "",
-      academicStream: me?.academicStream ?? "",
+      username: me?.username ?? "",
+      stream: me?.stream ?? "",
     });
     setEditing(true);
   };
 
   const saveEdit = () => {
     updateProfile.mutate(
-      { data: { displayName: form.displayName, section: form.section, academicStream: form.academicStream as never } },
+      { data: { displayName: form.displayName, username: form.username, stream: form.stream } },
       {
         onSuccess: () => {
           toast.success("Profile updated!");
@@ -224,27 +224,28 @@ export default function Profile() {
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Academic Stream</label>
                 {editing ? (
                   <select
-                    value={form.academicStream}
-                    onChange={(e) => setForm((f) => ({ ...f, academicStream: e.target.value }))}
+                    value={form.stream}
+                    onChange={(e) => setForm((f) => ({ ...f, stream: e.target.value }))}
                     className="w-full h-10 px-3 rounded-xl border border-border/60 text-sm bg-background outline-none focus:border-violet-400"
                   >
+                    <option value="">Select stream...</option>
                     {STREAMS.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                 ) : (
-                  <p className="font-semibold text-sm">{me.academicStream}</p>
+                  <p className="font-semibold text-sm">{me.stream ?? "—"}</p>
                 )}
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Section</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Username</label>
                 {editing ? (
                   <input
-                    value={form.section}
-                    onChange={(e) => setForm((f) => ({ ...f, section: e.target.value }))}
-                    className="w-full h-10 px-3 rounded-xl border border-border/60 text-sm bg-background outline-none focus:border-violet-400 uppercase"
-                    placeholder="A"
+                    value={form.username}
+                    onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+                    className="w-full h-10 px-3 rounded-xl border border-border/60 text-sm bg-background outline-none focus:border-violet-400"
+                    placeholder="@username"
                   />
                 ) : (
-                  <p className="font-semibold text-sm">{me.section}</p>
+                  <p className="font-semibold text-sm">{me.username ?? "—"}</p>
                 )}
               </div>
             </div>
@@ -296,7 +297,9 @@ export default function Profile() {
             </div>
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
-              {bets.map((bet) => <BetRow key={bet.id} bet={{ ...bet, status: bet.status ?? "active", marketQuestion: bet.marketQuestion ?? null }} />)}
+              {Array.isArray(bets) && bets.map((bet) => (
+                <BetRow key={bet.id} bet={{ ...bet, status: bet.status ?? "active", marketTitle: bet.marketTitle ?? null }} />
+              ))}
             </div>
           )}
         </div>

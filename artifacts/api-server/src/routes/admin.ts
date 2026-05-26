@@ -50,6 +50,35 @@ router.get("/admin/categories", requireAdmin, async (req, res) => {
   }
 });
 
+router.post("/admin/categories", requireAdmin, async (req, res) => {
+  try {
+    const { name } = req.body as { name?: string };
+    if (!name || typeof name !== "string" || !name.trim()) {
+      res.status(400).json({ error: "Category name is required" });
+      return;
+    }
+    const slug = name.trim().toLowerCase();
+    const db = getFirestore();
+    await db.collection("categories").doc(slug).set({ name: slug, createdAt: new Date() });
+    res.status(201).json({ name: slug });
+  } catch (err) {
+    req.log.error({ err }, "adminAddCategory error");
+    res.status(503).json({ error: "Service unavailable" });
+  }
+});
+
+router.delete("/admin/categories/:name", requireAdmin, async (req, res) => {
+  try {
+    const slug = req.params.name.toLowerCase();
+    const db = getFirestore();
+    await db.collection("categories").doc(slug).delete();
+    res.status(204).send();
+  } catch (err) {
+    req.log.error({ err }, "adminDeleteCategory error");
+    res.status(503).json({ error: "Service unavailable" });
+  }
+});
+
 router.post("/admin/markets", requireAdmin, async (req, res) => {
   try {
     const parsed = AdminCreateMarketBody.safeParse(req.body);
