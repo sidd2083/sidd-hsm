@@ -1,3 +1,28 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f0c29" />
+      <stop offset="50%" stop-color="#302b63" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a78bfa" />
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="180" height="180" rx="40" fill="url(#bg)" />
+
+  <!-- Bar 1 -->
+  <rect x="28" y="108" width="28" height="44" rx="7" fill="url(#bar)" opacity="0.55" />
+  <!-- Bar 2 -->
+  <rect x="72" y="82" width="28" height="70" rx="7" fill="url(#bar)" opacity="0.75" />
+  <!-- Bar 3 -->
+  <rect x="116" y="52" width="28" height="100" rx="7" fill="url(#bar)" />
+
+  <!-- Arrow line -->
+  <path d="M116 52 L152 18" stroke="#f0abfc" stroke-width="9" stroke-linecap="round"/>
+  <!-- Arrow head -->
+  <path d="M128 18 L152 18 L152 42" stroke="#f0abfc" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>

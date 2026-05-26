@@ -1,4 +1,5 @@
 export function PredicLogo({ size = 32 }: { size?: number }) {
+  const id = "lg";
   return (
     <svg
       width={size}
@@ -7,28 +8,51 @@ export function PredicLogo({ size = 32 }: { size?: number }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="40" height="40" rx="11" fill="url(#logoGrad)" />
+      <defs>
+        <linearGradient id={`${id}bg`} x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#0f0c29" />
+          <stop offset="50%" stopColor="#302b63" />
+          <stop offset="100%" stopColor="#7c3aed" />
+        </linearGradient>
+        <linearGradient id={`${id}bar`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#a78bfa" />
+          <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.6" />
+        </linearGradient>
+      </defs>
+
+      {/* Background */}
+      <rect width="40" height="40" rx="10" fill={`url(#${id}bg)`} />
+
+      {/* Bar 1 (shortest) */}
+      <rect x="7" y="24" width="5" height="9" rx="1.5" fill={`url(#${id}bar)`} opacity="0.6" />
+      {/* Bar 2 (medium) */}
+      <rect x="14" y="19" width="5" height="14" rx="1.5" fill={`url(#${id}bar)`} opacity="0.8" />
+      {/* Bar 3 (tallest) */}
+      <rect x="21" y="13" width="5" height="20" rx="1.5" fill={`url(#${id}bar)`} />
+
+      {/* Arrow shaft */}
       <path
-        d="M9 26 L15 18.5 L21 22 L31 11"
-        stroke="white"
-        strokeWidth="3"
+        d="M29.5 7 L35 7"
+        stroke="#f0abfc"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      {/* Arrow up */}
+      <path
+        d="M29.5 7 L29.5 12.5"
+        stroke="#f0abfc"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      {/* Arrow head pointing up-right */}
+      <path
+        d="M30 7 L35 7 L35 12"
+        stroke="#f0abfc"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
       />
-      <circle cx="31" cy="11" r="3.5" fill="white" />
-      <path
-        d="M27 30 L35 30"
-        stroke="rgba(255,255,255,0.35)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <defs>
-        <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="100%" stopColor="#4338ca" />
-        </linearGradient>
-      </defs>
     </svg>
   );
 }
