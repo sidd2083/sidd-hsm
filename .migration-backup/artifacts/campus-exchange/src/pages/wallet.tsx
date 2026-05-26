@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency } from "@/lib/market-math";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { ArrowDownLeft, ArrowUpRight, Gift, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Gift, TrendingUp, TrendingDown, BarChart2 } from "lucide-react";
 
 export default function Wallet() {
   const queryClient = useQueryClient();
@@ -20,8 +20,8 @@ export default function Wallet() {
 
   type Bet = NonNullable<typeof bets>[number];
   const totalStaked = bets?.reduce((s: number, b: Bet) => s + b.amountPaid, 0) ?? 0;
-  const totalWon = bets?.filter((b: Bet) => b.status === "won").reduce((s: number, b: Bet) => s + (b.payout ?? 0), 0) ?? 0;
-  const netPnl = totalWon - totalStaked;
+  const totalWon    = bets?.filter((b: Bet) => b.status === "won").reduce((s: number, b: Bet) => s + (b.payout ?? 0), 0) ?? 0;
+  const netPnl      = totalWon - totalStaked;
 
   const handleClaimBonus = () => {
     claimBonus.mutate(undefined, {
@@ -59,22 +59,27 @@ export default function Wallet() {
             className="mt-4 flex items-center gap-2 h-9 px-4 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-medium hover:bg-indigo-100 transition-colors disabled:opacity-60"
           >
             <Gift className="w-3.5 h-3.5" />
-            {claimBonus.isPending ? "Claiming..." : "Claim Daily ₹100"}
+            {claimBonus.isPending ? "Claiming..." : "Claim Daily +₹100"}
           </button>
         </div>
 
         <div className="grid grid-cols-3 gap-3">
           {[
             { label: "Total Staked", value: formatCurrency(totalStaked), icon: ArrowUpRight, color: "text-rose-500" },
-            { label: "Total Won", value: formatCurrency(totalWon), icon: ArrowDownLeft, color: "text-emerald-500" },
-            { label: "Net P&L", value: formatCurrency(Math.abs(netPnl)), icon: netPnl >= 0 ? TrendingUp : TrendingDown, color: netPnl >= 0 ? "text-emerald-500" : "text-rose-500" },
+            { label: "Total Won",    value: formatCurrency(totalWon),    icon: ArrowDownLeft, color: "text-emerald-500" },
+            { label: "Net P&L",      value: formatCurrency(Math.abs(netPnl)), icon: netPnl >= 0 ? TrendingUp : TrendingDown, color: netPnl >= 0 ? "text-emerald-500" : "text-rose-500" },
           ].map((stat) => (
             <div key={stat.label} className="bg-white border border-gray-100 rounded-xl p-4 card-shadow">
               <div className="flex items-center gap-1 text-xs text-gray-400 mb-1.5">
                 <stat.icon className={cn("w-3 h-3", stat.color)} />
                 {stat.label}
               </div>
-              <p className={cn("text-base font-bold font-mono", netPnl >= 0 && stat.label === "Net P&L" ? "text-emerald-600" : netPnl < 0 && stat.label === "Net P&L" ? "text-rose-500" : "text-gray-800")}>
+              <p className={cn(
+                "text-base font-bold font-mono",
+                netPnl >= 0 && stat.label === "Net P&L" ? "text-emerald-600"
+                : netPnl < 0 && stat.label === "Net P&L" ? "text-rose-500"
+                : "text-gray-800"
+              )}>
                 {stat.label === "Net P&L" && netPnl < 0 ? "-" : ""}{stat.value}
               </p>
             </div>
@@ -101,17 +106,19 @@ export default function Wallet() {
             </div>
           ) : !bets?.length ? (
             <div className="text-center py-14">
-              <p className="text-3xl mb-2">📊</p>
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                <BarChart2 className="w-5 h-5 text-slate-400" />
+              </div>
               <p className="text-sm font-medium text-gray-500">No bets yet</p>
               <p className="text-xs text-gray-400 mt-0.5">Head to Markets to start trading</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-50 max-h-[400px] overflow-y-auto">
               {bets.map((bet) => {
-                const isWon = bet.status === "won";
-                const isLost = bet.status === "lost";
+                const isWon    = bet.status === "won";
+                const isLost   = bet.status === "lost";
                 const isPending = !isWon && !isLost;
-                const profit = (bet.payout ?? 0) - bet.amountPaid;
+                const profit   = (bet.payout ?? 0) - bet.amountPaid;
                 return (
                   <div key={bet.id} className="flex items-center justify-between px-5 py-3">
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -125,7 +132,7 @@ export default function Wallet() {
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <p className="text-sm font-mono font-semibold text-gray-800">-{formatCurrency(bet.amountPaid)}</p>
-                      {isWon && <p className="text-xs text-emerald-600 font-mono font-medium">+{formatCurrency(profit)}</p>}
+                      {isWon  && <p className="text-xs text-emerald-600 font-mono font-medium">+{formatCurrency(profit)}</p>}
                       {isLost && <p className="text-xs text-gray-400">lost</p>}
                       {isPending && <p className="text-xs text-amber-500 capitalize font-medium">{bet.status}</p>}
                     </div>

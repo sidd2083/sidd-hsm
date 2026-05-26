@@ -15,21 +15,20 @@ import { formatCurrency } from "@/lib/market-math";
 import { cn } from "@/lib/utils";
 import {
   Users, PlusCircle, BarChart2, LogOut, CheckCircle, X, Search,
-  Trash2, Lock, TrendingUp, Tag, Eye, RefreshCw, ChevronDown,
+  Trash2, Lock, TrendingUp, Tag, RefreshCw,
 } from "lucide-react";
 
 type Tab = "overview" | "markets" | "create" | "users" | "categories";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
-async function adminFetch(path: string, options: RequestInit = {}) {
-  const creds = (window as unknown as Record<string, Record<string, string>>).__adminCreds ?? {};
+async function adminFetch(path: string, creds: { username: string; password: string }, options: RequestInit = {}) {
   const res = await fetch(`${BASE}/api${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      "x-admin-username": creds["username"] ?? "siddhant",
-      "x-admin-password": creds["password"] ?? "siddhant2078",
+      "x-admin-username": creds.username,
+      "x-admin-password": creds.password,
       ...options.headers,
     },
   });
@@ -41,24 +40,39 @@ export default function Admin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authError, setAuthError] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [creds, setCreds] = useState({ username: "", password: "" });
   const [tab, setTab] = useState<Tab>("overview");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === "siddhant" && password === "siddhant2078") {
-      setAdminCredentials(username, password);
-      (window as unknown as Record<string, unknown>).__adminCreds = { username, password };
+    setAuthError(null);
+    setAuthLoading(true);
+    try {
+      const c = { username: username.trim(), password };
+      // Verify against the server — if 503 Firebase isn't configured, if 403 wrong password
+      await adminFetch("/admin/stats", c);
+      setAdminCredentials(username.trim(), password);
+      setCreds(c);
       setIsAuthenticated(true);
-      setAuthError(false);
-    } else {
-      setAuthError(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("503") || msg.toLowerCase().includes("firebase")) {
+        setAuthError("Firebase is not configured yet. Ask the admin to add FIREBASE_SERVICE_ACCOUNT to the server.");
+      } else if (msg.includes("403") || msg.toLowerCase().includes("forbidden")) {
+        setAuthError("Invalid username or password.");
+      } else {
+        setAuthError("Could not connect to server. Make sure the API is running.");
+      }
+    } finally {
+      setAuthLoading(false);
     }
   };
 
   const handleLogout = () => {
     setAdminCredentials(null, null);
-    (window as unknown as Record<string, unknown>).__adminCreds = {};
+    setCreds({ username: "", password: "" });
     setIsAuthenticated(false);
     setUsername("");
     setPassword("");
@@ -76,7 +90,7 @@ export default function Admin() {
                   <Lock className="w-5 h-5 text-white" />
                 </div>
                 <h1 className="text-xl font-extrabold text-gray-900">Admin Panel</h1>
-                <p className="text-xs text-gray-400 mt-1">Predic Hsm · HSM Management</p>
+                <p className="text-xs text-gray-400 mt-1">Predic HSM Management</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-4">
@@ -86,12 +100,12 @@ export default function Admin() {
                     type="text"
                     autoComplete="username"
                     value={username}
-                    onChange={(e) => { setUsername(e.target.value); setAuthError(false); }}
+                    onChange={(e) => { setUsername(e.target.value); setAuthError(null); }}
                     className={cn(
                       "w-full h-11 px-3.5 rounded-xl border text-sm outline-none transition-colors bg-white font-medium",
                       authError ? "border-red-400 focus:border-red-500" : "border-[#E8EAF0] focus:border-indigo-400"
                     )}
-                    placeholder="Enter username"
+                    placeholder="Admin username"
                     required
                   />
                 </div>
@@ -101,40 +115,45 @@ export default function Admin() {
                     type="password"
                     autoComplete="current-password"
                     value={password}
-                    onChange={(e) => { setPassword(e.target.value); setAuthError(false); }}
+                    onChange={(e) => { setPassword(e.target.value); setAuthError(null); }}
                     className={cn(
                       "w-full h-11 px-3.5 rounded-xl border text-sm outline-none transition-colors bg-white font-medium",
                       authError ? "border-red-400 focus:border-red-500" : "border-[#E8EAF0] focus:border-indigo-400"
                     )}
-                    placeholder="Enter password"
+                    placeholder="Admin password"
                     required
                   />
                 </div>
                 {authError && (
-                  <p className="text-sm text-red-600 flex items-center gap-1.5 font-medium">
-                    <X className="w-3.5 h-3.5" /> Invalid credentials
+                  <p className="text-sm text-red-600 flex items-start gap-1.5 font-medium leading-snug">
+                    <X className="w-3.5 h-3.5 mt-0.5 shrink-0" /> {authError}
                   </p>
                 )}
                 <button
                   type="submit"
-                  className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors shadow-sm"
+                  disabled={authLoading}
+                  className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors shadow-sm disabled:opacity-60 flex items-center justify-center gap-2"
                 >
-                  Login to Admin
+                  {authLoading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                  {authLoading ? "Verifying..." : "Login to Admin"}
                 </button>
               </form>
             </div>
           </div>
+          <p className="text-center text-xs text-gray-400 mt-4">
+            Credentials are set via ADMIN_USERNAME / ADMIN_PASSWORD server env vars.
+          </p>
         </div>
       </div>
     );
   }
 
   const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: "overview",    label: "Overview",    icon: TrendingUp },
-    { id: "markets",     label: "Markets",     icon: BarChart2 },
-    { id: "create",      label: "Create",      icon: PlusCircle },
-    { id: "users",       label: "Users",       icon: Users },
-    { id: "categories",  label: "Categories",  icon: Tag },
+    { id: "overview",   label: "Overview",    icon: TrendingUp },
+    { id: "markets",    label: "Markets",     icon: BarChart2 },
+    { id: "create",     label: "Create",      icon: PlusCircle },
+    { id: "users",      label: "Users",       icon: Users },
+    { id: "categories", label: "Categories",  icon: Tag },
   ];
 
   return (
@@ -142,14 +161,12 @@ export default function Admin() {
       {/* Admin header */}
       <div className="bg-white border-b border-[#E8EAF0] sticky top-0 z-40" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[60px]">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
-                <Lock className="w-3.5 h-3.5 text-white" />
-              </div>
-              <span className="font-extrabold text-gray-900 text-sm">Admin Panel</span>
-              <span className="text-xs text-gray-400 font-medium hidden sm:block">· Predic Hsm</span>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
+              <Lock className="w-3.5 h-3.5 text-white" />
             </div>
+            <span className="font-extrabold text-gray-900 text-sm">Admin Panel</span>
+            <span className="text-xs text-gray-400 font-medium hidden sm:block">· Predic HSM</span>
           </div>
           <button
             onClick={handleLogout}
@@ -182,11 +199,11 @@ export default function Admin() {
 
         {/* Tab content */}
         <div>
-          {tab === "overview"   && <OverviewTab />}
-          {tab === "markets"    && <ManageMarkets />}
-          {tab === "create"     && <CreateMarket />}
-          {tab === "users"      && <ManageUsers />}
-          {tab === "categories" && <ManageCategories />}
+          {tab === "overview"   && <OverviewTab creds={creds} />}
+          {tab === "markets"    && <ManageMarkets creds={creds} />}
+          {tab === "create"     && <CreateMarket creds={creds} />}
+          {tab === "users"      && <ManageUsers creds={creds} />}
+          {tab === "categories" && <ManageCategories creds={creds} />}
         </div>
       </div>
     </div>
@@ -194,31 +211,31 @@ export default function Admin() {
 }
 
 // ── Overview ───────────────────────────────────────────────────────────────────
-function OverviewTab() {
+function OverviewTab({ creds }: { creds: { username: string; password: string } }) {
   const [stats, setStats] = useState<Record<string, number> | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await adminFetch("/admin/stats");
+      const data = await adminFetch("/admin/stats", creds);
       setStats(data);
     } catch {
       toast.error("Failed to load stats");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [creds]);
 
   useEffect(() => { load(); }, [load]);
 
   const items = stats ? [
-    { label: "Total Markets",   value: stats["totalMarkets"]   ?? 0, color: "text-indigo-600 bg-indigo-50", fmt: String },
-    { label: "Active Markets",  value: stats["activeMarkets"]  ?? 0, color: "text-blue-600 bg-blue-50",    fmt: String },
-    { label: "Resolved",        value: stats["resolvedMarkets"]?? 0, color: "text-emerald-600 bg-emerald-50", fmt: String },
-    { label: "Total Users",     value: stats["totalUsers"]     ?? 0, color: "text-purple-600 bg-purple-50", fmt: String },
-    { label: "Total Bets",      value: stats["totalBets"]      ?? 0, color: "text-amber-600 bg-amber-50",  fmt: String },
-    { label: "Total Volume",    value: stats["totalVolume"]    ?? 0, color: "text-rose-600 bg-rose-50",    fmt: (v: number) => formatCurrency(v) },
+    { label: "Total Markets",  value: stats["totalMarkets"]    ?? 0, colorClass: "text-indigo-600",  fmt: String },
+    { label: "Active Markets", value: stats["activeMarkets"]   ?? 0, colorClass: "text-blue-600",    fmt: String },
+    { label: "Resolved",       value: stats["resolvedMarkets"] ?? 0, colorClass: "text-emerald-600", fmt: String },
+    { label: "Total Users",    value: stats["totalUsers"]      ?? 0, colorClass: "text-purple-600",  fmt: String },
+    { label: "Total Bets",     value: stats["totalBets"]       ?? 0, colorClass: "text-amber-600",   fmt: String },
+    { label: "Total Volume",   value: stats["totalVolume"]     ?? 0, colorClass: "text-rose-600",    fmt: (v: number) => formatCurrency(v) },
   ] : [];
 
   return (
@@ -235,40 +252,22 @@ function OverviewTab() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {items.map(({ label, value, color, fmt }) => (
+          {items.map(({ label, value, colorClass, fmt }) => (
             <div key={label} className="bg-white rounded-2xl border border-[#E8EAF0] p-5 card-shadow space-y-2">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</p>
-              <p className={cn("text-2xl font-extrabold", color.split(" ")[0])}>
+              <p className={cn("text-2xl font-extrabold", colorClass)}>
                 {fmt(value as number)}
               </p>
             </div>
           ))}
         </div>
       )}
-      <div className="bg-white rounded-2xl border border-[#E8EAF0] p-5 card-shadow">
-        <h3 className="font-bold text-gray-800 mb-3 text-sm">Quick Actions</h3>
-        <div className="flex flex-wrap gap-2">
-          {[
-            { label: "Create New Market", color: "bg-indigo-600 text-white hover:bg-indigo-700", tab: "create" as Tab },
-            { label: "Manage Markets",    color: "bg-white border border-[#E8EAF0] text-gray-700 hover:bg-slate-50", tab: "markets" as Tab },
-            { label: "View Users",        color: "bg-white border border-[#E8EAF0] text-gray-700 hover:bg-slate-50", tab: "users" as Tab },
-          ].map(action => (
-            <button
-              key={action.label}
-              onClick={() => document.dispatchEvent(new CustomEvent("admin-tab", { detail: action.tab }))}
-              className={cn("px-4 py-2 rounded-xl text-sm font-semibold transition-colors", action.color)}
-            >
-              {action.label}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
 
 // ── Manage Markets ─────────────────────────────────────────────────────────────
-function ManageMarkets() {
+function ManageMarkets({ creds }: { creds: { username: string; password: string } }) {
   const { data: markets, isLoading, refetch } = useListMarkets();
   const resolveMarket = useAdminResolveMarket();
   const queryClient = useQueryClient();
@@ -298,7 +297,7 @@ function ManageMarkets() {
     if (!confirm(`Delete market:\n"${question}"\n\nThis permanently removes the market. Bets are NOT refunded.`)) return;
     setDeletingId(id);
     try {
-      await adminFetch(`/admin/markets/${id}`, { method: "DELETE" });
+      await adminFetch(`/admin/markets/${id}`, creds, { method: "DELETE" });
       toast.success("Market deleted");
       queryClient.invalidateQueries({ queryKey: getListMarketsQueryKey() });
     } catch (e) {
@@ -312,7 +311,7 @@ function ManageMarkets() {
     if (!confirm("Lock this market immediately? No new bets will be accepted.")) return;
     setLockingId(id);
     try {
-      await adminFetch(`/admin/markets/${id}`, {
+      await adminFetch(`/admin/markets/${id}`, creds, {
         method: "PATCH",
         body: JSON.stringify({ lockTimestamp: Date.now() - 1 }),
       });
@@ -370,7 +369,6 @@ function ManageMarkets() {
             const isEffectivelyLocked = market.status !== "active" || Date.now() >= market.lockTimestamp;
             const isResolved = market.status === "resolved";
             const totalPool = market.yesPool + market.noPool;
-
             return (
               <div key={market.id} className="bg-white rounded-2xl border border-[#E8EAF0] p-4 card-shadow">
                 <div className="flex items-start justify-between gap-4">
@@ -453,7 +451,7 @@ function ManageMarkets() {
 // ── Create Market ──────────────────────────────────────────────────────────────
 const DEFAULT_CATEGORIES = ["sports", "college", "social", "national"];
 
-function CreateMarket() {
+function CreateMarket({ creds }: { creds: { username: string; password: string } }) {
   const createMarket = useAdminCreateMarket();
   const queryClient = useQueryClient();
   const [customCats, setCustomCats] = useState<string[]>([]);
@@ -469,10 +467,10 @@ function CreateMarket() {
   });
 
   useEffect(() => {
-    adminFetch("/admin/categories")
+    adminFetch("/admin/categories", creds)
       .then(d => setCustomCats(d.categories ?? []))
       .catch(() => {});
-  }, []);
+  }, [creds]);
 
   const allCategories = [...DEFAULT_CATEGORIES, ...customCats.filter(c => !DEFAULT_CATEGORIES.includes(c))];
 
@@ -489,17 +487,12 @@ function CreateMarket() {
       ? form.customCategory.trim().toLowerCase()
       : form.category;
     const lockTimestamp = getLockTimestamp();
-
-    if (lockTimestamp <= Date.now()) {
-      toast.error("Lock time must be in the future");
-      return;
-    }
-
+    if (lockTimestamp <= Date.now()) { toast.error("Lock time must be in the future"); return; }
     createMarket.mutate(
       { data: { question: form.question, category: category as never, lockTimestamp } },
       {
         onSuccess: () => {
-          toast.success("Market created successfully!");
+          toast.success("Market created!");
           setForm({ ...form, question: "", description: "", customCategory: "" });
           queryClient.invalidateQueries({ queryKey: getListMarketsQueryKey() });
         },
@@ -513,141 +506,111 @@ function CreateMarket() {
   return (
     <div className="max-w-2xl">
       <div className="bg-white rounded-2xl border border-[#E8EAF0] overflow-hidden card-shadow">
-        <div className="px-6 py-4 border-b border-[#E8EAF0] bg-slate-50">
-          <h2 className="font-extrabold text-gray-900">Create New Market</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Fill in all details before publishing</p>
+        <div className="px-6 py-4 border-b border-[#E8EAF0]">
+          <h2 className="text-base font-extrabold text-gray-900">Create New Market</h2>
+          <p className="text-xs text-gray-400 mt-0.5">All fields are required</p>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Question */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Question *</label>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Question</label>
             <textarea
-              required
-              rows={3}
               value={form.question}
               onChange={e => setForm({ ...form, question: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 transition-colors bg-white resize-none font-medium placeholder:text-gray-300"
-              placeholder="e.g. Will the HSM football team win the inter-college tournament?"
+              className="w-full px-3.5 py-3 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 resize-none bg-white font-medium placeholder:text-gray-300"
+              placeholder="Will HSM win the inter-college football final?"
+              rows={3}
+              required
             />
-            <p className="text-xs text-gray-400">Write a clear yes/no question about a future event.</p>
           </div>
 
-          {/* Description */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Description (optional)</label>
-            <textarea
-              rows={2}
-              value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 transition-colors bg-white resize-none font-medium placeholder:text-gray-300"
-              placeholder="Additional context about this market..."
-            />
-          </div>
-
-          {/* Category */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Category *</label>
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                <input type="radio" checked={!form.useCustom} onChange={() => setForm({ ...form, useCustom: false })} className="accent-indigo-600" />
-                Existing
-              </label>
-              <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                <input type="radio" checked={form.useCustom} onChange={() => setForm({ ...form, useCustom: true })} className="accent-indigo-600" />
-                New category
-              </label>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</label>
+            <div className="flex flex-wrap gap-2">
+              {allCategories.map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setForm({ ...form, category: c, useCustom: false })}
+                  className={cn(
+                    "px-3.5 py-1.5 rounded-xl text-sm font-semibold border capitalize transition-all",
+                    form.category === c && !form.useCustom
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-white text-gray-500 border-[#E8EAF0] hover:border-indigo-300"
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, useCustom: true })}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-xl text-sm font-semibold border transition-all",
+                  form.useCustom
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "bg-white text-gray-400 border-dashed border-[#E8EAF0] hover:border-indigo-300"
+                )}
+              >
+                + Custom
+              </button>
             </div>
-
-            {form.useCustom ? (
+            {form.useCustom && (
               <input
-                required
                 value={form.customCategory}
                 onChange={e => setForm({ ...form, customCategory: e.target.value })}
-                className="w-full h-11 px-3.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 transition-colors bg-white font-medium placeholder:text-gray-300"
-                placeholder="e.g. campus-events, technology, arts..."
+                className="w-full h-10 px-3.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 bg-white font-medium placeholder:text-gray-300"
+                placeholder="e.g. exams, canteen, events"
               />
-            ) : (
-              <div className="relative">
-                <select
-                  value={form.category}
-                  onChange={e => setForm({ ...form, category: e.target.value })}
-                  className="w-full h-11 px-3.5 pr-9 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 transition-colors bg-white font-medium appearance-none"
-                >
-                  {allCategories.map(c => (
-                    <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
             )}
           </div>
 
-          {/* Lock time */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Betting Closes *</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Lock Time</label>
             <div className="flex gap-2">
-              <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                <input type="radio" checked={form.lockMode === "hours"} onChange={() => setForm({ ...form, lockMode: "hours" })} className="accent-indigo-600" />
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, lockMode: "hours" })}
+                className={cn("flex-1 py-2 text-sm font-semibold rounded-xl border transition-all", form.lockMode === "hours" ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-500 border-[#E8EAF0]")}
+              >
                 Hours from now
-              </label>
-              <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                <input type="radio" checked={form.lockMode === "datetime"} onChange={() => setForm({ ...form, lockMode: "datetime" })} className="accent-indigo-600" />
-                Exact date & time
-              </label>
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, lockMode: "datetime" })}
+                className={cn("flex-1 py-2 text-sm font-semibold rounded-xl border transition-all", form.lockMode === "datetime" ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-500 border-[#E8EAF0]")}
+              >
+                Specific date & time
+              </button>
             </div>
-
             {form.lockMode === "hours" ? (
-              <div className="flex gap-2 items-center">
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  max="8760"
-                  value={form.hours}
-                  onChange={e => setForm({ ...form, hours: e.target.value })}
-                  className="w-32 h-11 px-3.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 font-mono font-semibold bg-white"
-                />
-                <span className="text-sm text-gray-500 font-medium">hours</span>
-                {form.hours && (
-                  <span className="text-xs text-gray-400 ml-1">
-                    = {new Date(Date.now() + parseInt(form.hours) * 3600000).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                )}
-              </div>
+              <input
+                type="number"
+                min="1"
+                value={form.hours}
+                onChange={e => setForm({ ...form, hours: e.target.value })}
+                className="w-full h-10 px-3.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 bg-white font-medium"
+                placeholder="48"
+              />
             ) : (
               <input
                 type="datetime-local"
-                required
                 value={form.lockDatetime}
                 onChange={e => setForm({ ...form, lockDatetime: e.target.value })}
-                min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
-                className="w-full h-11 px-3.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 transition-colors bg-white font-medium"
+                className="w-full h-10 px-3.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 bg-white font-medium"
               />
             )}
+            <p className="text-xs text-gray-400">
+              Preview: {new Date(preview).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            </p>
           </div>
-
-          {/* Preview */}
-          {form.question && (
-            <div className="bg-slate-50 rounded-xl border border-[#E8EAF0] p-4 space-y-1.5">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Preview</p>
-              <p className="text-sm font-semibold text-gray-800">{form.question}</p>
-              <div className="flex flex-wrap gap-2 text-xs text-gray-400 font-medium">
-                <span className="bg-white border border-[#E8EAF0] px-2 py-0.5 rounded-lg capitalize">
-                  {form.useCustom ? form.customCategory || "custom" : form.category}
-                </span>
-                <span className="bg-white border border-[#E8EAF0] px-2 py-0.5 rounded-lg">
-                  Closes: {new Date(preview).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                </span>
-              </div>
-            </div>
-          )}
 
           <button
             type="submit"
-            disabled={createMarket.isPending || !form.question.trim()}
-            className="w-full h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors disabled:opacity-40 shadow-sm"
+            disabled={createMarket.isPending}
+            className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors shadow-sm disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            {createMarket.isPending ? "Publishing Market..." : "Publish Market"}
+            {createMarket.isPending && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            {createMarket.isPending ? "Creating..." : "Create Market"}
           </button>
         </form>
       </div>
@@ -656,32 +619,31 @@ function CreateMarket() {
 }
 
 // ── Manage Users ───────────────────────────────────────────────────────────────
-function ManageUsers() {
+function ManageUsers({ creds }: { creds: { username: string; password: string } }) {
   const { data: users, isLoading } = useAdminListUsers({ query: { queryKey: getAdminListUsersQueryKey() } });
   const adjustWallet = useAdminAdjustWallet();
   const queryClient = useQueryClient();
-  const [selected, setSelected] = useState<{ uid: string; name: string; balance: number } | null>(null);
-  const [amount, setAmount] = useState("");
-  const [reason, setReason] = useState("Admin adjustment");
   const [search, setSearch] = useState("");
-  const [showAdjust, setShowAdjust] = useState(false);
+  const [adjustUid, setAdjustUid] = useState<string | null>(null);
+  const [adjustAmount, setAdjustAmount] = useState("");
 
   const filtered = users?.filter(u =>
-    u.displayName?.toLowerCase().includes(search.toLowerCase()) ||
-    u.email?.toLowerCase().includes(search.toLowerCase())
+    search.trim() === "" ||
+    (u.displayName ?? "").toLowerCase().includes(search.toLowerCase()) ||
+    (u.email ?? "").toLowerCase().includes(search.toLowerCase())
   ) ?? [];
 
-  const handleAdjust = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selected || !amount) return;
+  const handleAdjust = (uid: string) => {
+    const amount = parseInt(adjustAmount);
+    if (isNaN(amount) || amount === 0) { toast.error("Enter a valid amount"); return; }
     adjustWallet.mutate(
-      { uid: selected.uid, data: { amount: parseFloat(amount), reason } },
+      { uid, data: { amount } },
       {
         onSuccess: () => {
-          toast.success(`Wallet adjusted for ${selected.name}`);
-          setAmount("");
-          setShowAdjust(false);
+          toast.success(`Wallet adjusted by ${formatCurrency(amount)}`);
           queryClient.invalidateQueries({ queryKey: getAdminListUsersQueryKey() });
+          setAdjustUid(null);
+          setAdjustAmount("");
         },
         onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Failed"),
       }
@@ -696,99 +658,57 @@ function ManageUsers() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="w-full h-10 pl-9 pr-4 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 bg-white font-medium placeholder:text-gray-300"
-          placeholder="Search users by name or email..."
+          placeholder="Search by name or email..."
         />
       </div>
-
       <p className="text-xs text-gray-400 font-medium">{filtered.length} users</p>
 
-      {/* Adjust panel */}
-      {showAdjust && selected && (
-        <div className="bg-white rounded-2xl border border-indigo-200 p-5 card-shadow space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-bold text-gray-900 text-sm">{selected.name}</p>
-              <p className="text-xs text-gray-400">Current balance: <strong className="font-mono text-gray-700">{formatCurrency(selected.balance)}</strong></p>
-            </div>
-            <button onClick={() => setShowAdjust(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
-          </div>
-          <form onSubmit={handleAdjust} className="grid sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Amount</label>
-              <input
-                type="number"
-                required
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                className="w-full h-10 px-3.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 bg-white font-mono font-semibold"
-                placeholder="+5000 or -1000"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Reason</label>
-              <input
-                required
-                value={reason}
-                onChange={e => setReason(e.target.value)}
-                className="w-full h-10 px-3.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 bg-white font-medium"
-              />
-            </div>
-            <div className="flex items-end">
-              <button
-                type="submit"
-                disabled={!amount || adjustWallet.isPending}
-                className="w-full h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors disabled:opacity-40"
-              >
-                {adjustWallet.isPending ? "..." : "Apply"}
-              </button>
-            </div>
-          </form>
-          {amount && (
-            <p className="text-xs text-gray-400">
-              New balance: <strong className="font-mono text-gray-700">{formatCurrency(selected.balance + parseFloat(amount || "0"))}</strong>
-            </p>
-          )}
-        </div>
-      )}
-
       {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-14 bg-white rounded-2xl shimmer" />)}
-        </div>
+        <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-16 bg-white rounded-2xl shimmer" />)}</div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E8EAF0] overflow-hidden card-shadow divide-y divide-[#E8EAF0]">
-          {filtered.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8 font-medium">No users found</p>
-          ) : filtered.map((user, idx) => (
-            <div
-              key={user.uid}
-              className={cn(
-                "flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors",
-                selected?.uid === user.uid && "bg-indigo-50"
+        <div className="space-y-2">
+          {filtered.map(user => (
+            <div key={user.uid} className="bg-white rounded-2xl border border-[#E8EAF0] p-4 card-shadow">
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-gray-800 text-sm truncate">{user.displayName ?? "Unknown"}</p>
+                  <p className="text-xs text-gray-400 truncate">{user.email ?? user.uid}</p>
+                  {user.academicStream && <p className="text-xs text-indigo-600 font-medium mt-0.5">{user.academicStream}</p>}
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-base font-extrabold text-emerald-600 font-mono">{formatCurrency(user.walletBalance ?? 0)}</p>
+                  <button
+                    onClick={() => { setAdjustUid(adjustUid === user.uid ? null : user.uid); setAdjustAmount(""); }}
+                    className="text-xs font-semibold text-indigo-600 hover:underline mt-0.5"
+                  >
+                    Adjust wallet
+                  </button>
+                </div>
+              </div>
+              {adjustUid === user.uid && (
+                <div className="mt-3 pt-3 border-t border-[#E8EAF0] flex gap-2">
+                  <input
+                    type="number"
+                    value={adjustAmount}
+                    onChange={e => setAdjustAmount(e.target.value)}
+                    placeholder="e.g. 5000 or -1000"
+                    className="flex-1 h-9 px-3 rounded-lg border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 bg-white font-medium"
+                  />
+                  <button
+                    onClick={() => handleAdjust(user.uid)}
+                    disabled={adjustWallet.isPending}
+                    className="px-4 h-9 rounded-lg bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors disabled:opacity-60"
+                  >
+                    Apply
+                  </button>
+                  <button
+                    onClick={() => setAdjustUid(null)}
+                    className="px-3 h-9 rounded-lg bg-gray-50 text-gray-500 text-sm font-semibold hover:bg-gray-100 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               )}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-black shrink-0">
-                  {idx + 1}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-800 truncate">{user.displayName ?? "—"}</p>
-                  <p className="text-xs text-gray-400 truncate">{user.email}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="font-mono text-sm font-bold text-gray-700">{formatCurrency(user.walletBalance)}</span>
-                <button
-                  onClick={() => {
-                    setSelected({ uid: user.uid, name: user.displayName ?? user.email ?? user.uid, balance: user.walletBalance });
-                    setShowAdjust(true);
-                    setAmount("");
-                  }}
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors"
-                >
-                  <Eye className="w-3 h-3" /> Adjust
-                </button>
-              </div>
             </div>
           ))}
         </div>
@@ -798,121 +718,106 @@ function ManageUsers() {
 }
 
 // ── Manage Categories ──────────────────────────────────────────────────────────
-const DEFAULT_CATS = ["sports", "college", "social", "national"];
-
-function ManageCategories() {
-  const [categories, setCategories] = useState<string[]>([]);
+function ManageCategories({ creds }: { creds: { username: string; password: string } }) {
+  const [cats, setCats] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [newCat, setNewCat] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [removingCat, setRemovingCat] = useState<string | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await adminFetch("/admin/categories");
-      setCategories(data.categories ?? []);
+      const d = await adminFetch("/admin/categories", creds);
+      setCats(d.categories ?? []);
     } catch {
       toast.error("Failed to load categories");
     } finally {
       setLoading(false);
     }
-  };
+  }, [creds]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCat.trim()) return;
-    const slug = newCat.trim().toLowerCase().replace(/\s+/g, "-");
-    if (DEFAULT_CATS.includes(slug) || categories.includes(slug)) {
-      toast.error("Category already exists");
-      return;
-    }
-    setSaving(true);
+    setAdding(true);
     try {
-      await adminFetch("/admin/categories", { method: "POST", body: JSON.stringify({ name: slug }) });
+      await adminFetch("/admin/categories", creds, { method: "POST", body: JSON.stringify({ name: newCat.trim() }) });
       setNewCat("");
-      toast.success(`Category "${slug}" added`);
       load();
+      toast.success("Category added");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
     } finally {
-      setSaving(false);
+      setAdding(false);
     }
   };
 
-  const handleDelete = async (name: string) => {
-    if (!confirm(`Remove category "${name}"? Markets using it won't be affected.`)) return;
-    setDeleting(name);
+  const handleRemove = async (name: string) => {
+    if (!confirm(`Remove category "${name}"?`)) return;
+    setRemovingCat(name);
     try {
-      await adminFetch(`/admin/categories/${name}`, { method: "DELETE" });
-      toast.success(`Category "${name}" removed`);
+      await adminFetch(`/admin/categories/${name}`, creds, { method: "DELETE" });
       load();
+      toast.success("Category removed");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
     } finally {
-      setDeleting(null);
+      setRemovingCat(null);
     }
   };
-
-  const allCats = [
-    ...DEFAULT_CATS.map(c => ({ name: c, isDefault: true })),
-    ...categories.filter(c => !DEFAULT_CATS.includes(c)).map(c => ({ name: c, isDefault: false })),
-  ];
 
   return (
     <div className="max-w-lg space-y-5">
       <div className="bg-white rounded-2xl border border-[#E8EAF0] overflow-hidden card-shadow">
-        <div className="px-6 py-4 border-b border-[#E8EAF0] bg-slate-50">
-          <h2 className="font-extrabold text-gray-900">Market Categories</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Add custom categories for new types of markets</p>
+        <div className="px-5 py-4 border-b border-[#E8EAF0]">
+          <h2 className="text-base font-extrabold text-gray-900">Market Categories</h2>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="p-5">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Default categories (cannot be removed)</p>
+          <div className="flex flex-wrap gap-2 mb-5">
+            {DEFAULT_CATEGORIES.map(c => (
+              <span key={c} className="px-3 py-1.5 rounded-xl bg-slate-50 border border-[#E8EAF0] text-sm font-semibold text-gray-500 capitalize">{c}</span>
+            ))}
+          </div>
           {loading ? (
-            <div className="space-y-2">
-              {[1,2,3,4].map(i => <div key={i} className="h-10 bg-slate-100 rounded-xl shimmer" />)}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {allCats.map(({ name, isDefault }) => (
-                <div key={name} className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 border border-[#E8EAF0]">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-700 capitalize">{name}</span>
-                    {isDefault && (
-                      <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md uppercase">Built-in</span>
-                    )}
-                  </div>
-                  {!isDefault && (
+            <div className="h-12 bg-slate-50 rounded-xl shimmer" />
+          ) : cats.length > 0 && (
+            <>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Custom categories</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {cats.map(c => (
+                  <div key={c} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-100">
+                    <span className="text-sm font-semibold text-indigo-700 capitalize">{c}</span>
                     <button
-                      onClick={() => handleDelete(name)}
-                      disabled={deleting === name}
-                      className="text-xs font-semibold text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors disabled:opacity-50"
+                      onClick={() => handleRemove(c)}
+                      disabled={removingCat === c}
+                      className="text-indigo-400 hover:text-red-500 transition-colors"
                     >
-                      <Trash2 className="w-3 h-3" /> {deleting === name ? "..." : "Remove"}
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                  )}
-                </div>
-              ))}
-            </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
-
-          <form onSubmit={handleAdd} className="flex gap-2 pt-2">
+          <form onSubmit={handleAdd} className="flex gap-2">
             <input
               value={newCat}
               onChange={e => setNewCat(e.target.value)}
               className="flex-1 h-10 px-3.5 rounded-xl border border-[#E8EAF0] text-sm outline-none focus:border-indigo-400 bg-white font-medium placeholder:text-gray-300"
-              placeholder="e.g. technology, arts, events..."
+              placeholder="New category name..."
             />
             <button
               type="submit"
-              disabled={saving || !newCat.trim()}
-              className="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors disabled:opacity-40"
+              disabled={adding || !newCat.trim()}
+              className="px-4 h-10 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors disabled:opacity-60"
             >
-              {saving ? "..." : "Add"}
+              Add
             </button>
           </form>
-          <p className="text-xs text-gray-400">Spaces become hyphens. e.g. "campus events" → "campus-events"</p>
         </div>
       </div>
     </div>

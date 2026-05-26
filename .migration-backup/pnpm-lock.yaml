@@ -646,9 +646,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.2
-      firebase-admin:
-        specifier: ^13.4.0
-        version: 13.10.0
       tsx:
         specifier: 'catalog:'
         version: 4.21.0
