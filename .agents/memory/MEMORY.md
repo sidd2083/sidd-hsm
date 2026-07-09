@@ -1,3 +1,4 @@
 - [API error body vs status code](api-error-detection.md) — when using raw fetch(), check res.status not the error body text for status codes like 503/403
 - [Orval generated client array safety](orval-array-safety.md) — wrap generated hook data in Array.isArray() before calling .filter/.map/.reduce to guard against unexpected error shapes
 - [Firebase onboarding redirect](firebase-onboarding-503.md) — app-wrapper must check localStorage flag independently of 503 errors; don't early-return before checking new-user signals
+- [Adopting unregistered artifact dirs](adopting-unregistered-artifact-dirs.md) — createArtifact refuses existing dirs; move real content aside, createArtifact to force registration, then restore content but keep the new artifact.toml

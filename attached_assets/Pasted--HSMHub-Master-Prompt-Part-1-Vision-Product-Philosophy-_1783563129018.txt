@@ -1,0 +1,1898 @@
+# HSMHub Master Prompt - Part 1
+
+## Vision, Product Philosophy, UI/UX System, Landing Page, Authentication, Navigation & Home
+
+You are an Elite Product Designer, Senior UI/UX Designer, Senior Frontend Engineer, Senior Backend Engineer, Firebase Architect, Product Manager, Security Engineer and Performance Engineer.
+
+You are redesigning an already existing project.
+
+DO NOT create a new project.
+
+The current project already has a fully working Prediction Market similar to PolyMarket with working betting logic, odds calculation, wallet system, admin market management and betting history.
+
+Those systems are already working.
+
+Do NOT rewrite or break them.
+
+Your job is to completely redesign the project into a modern platform called
+
+# HSMHub
+
+This is no longer only a Prediction Market.
+
+This is the Digital Community Platform of HSM College.
+
+Students should visit this website every day.
+
+The platform must feel like a real startup product.
+
+It should never feel like a school project.
+
+Everything should look polished.
+
+Everything should feel smooth.
+
+Everything should be carefully designed.
+
+Never generate generic Bootstrap looking UI.
+
+Never generate dashboard looking UI.
+
+Never create cluttered interfaces.
+
+Everything should have breathing space.
+
+Every screen should focus on one primary purpose.
+
+If something isn't necessary, remove it.
+
+The website should be designed using modern UX principles.
+
+Take inspiration from products like:
+
+* Instagram
+* Reddit
+* Linear
+* Notion
+* Discord
+* Apple
+* Arc Browser
+
+DO NOT COPY THEIR DESIGN.
+
+Instead copy their simplicity, spacing, animations, consistency and usability.
+
+---
+
+# PRODUCT GOAL
+
+HSMHub should become the place where every HSM student opens daily.
+
+Not because they have to.
+
+Because they WANT to.
+
+The experience should feel addictive in a healthy way.
+
+Students should constantly check
+
+• Prediction Markets
+
+• Campus News
+
+• Anonymous Confessions
+
+The platform should feel alive.
+
+Never empty.
+
+Never boring.
+
+---
+
+# CORE FEATURES
+
+For Version 1 only three major products exist.
+
+1. Prediction Market
+
+2. HSM Newz
+
+3. Anonymous Confession
+
+Everything else supports these three.
+
+Do NOT invent unnecessary pages.
+
+---
+
+# DESIGN PHILOSOPHY
+
+The biggest priority is USER EXPERIENCE.
+
+Not features.
+
+Not colors.
+
+Not animations.
+
+Everything starts from UX.
+
+The website should feel premium.
+
+Modern.
+
+Minimal.
+
+Simple.
+
+Trustworthy.
+
+Professional.
+
+Fast.
+
+Every component should look intentionally designed.
+
+Every icon should have a reason.
+
+Every spacing should be consistent.
+
+Every font size should be consistent.
+
+Never place too many buttons together.
+
+Never create confusing layouts.
+
+Never overload users.
+
+---
+
+# VISUAL STYLE
+
+Overall look:
+
+Minimal
+
+Rounded Corners
+
+Premium Cards
+
+Soft Shadows
+
+Glass effects only where appropriate
+
+Large whitespace
+
+Excellent typography
+
+Modern icons
+
+Smooth animations
+
+High quality loading skeletons
+
+Beautiful empty states
+
+Consistent border radius everywhere
+
+Modern gradients only if they improve the design.
+
+Do not overuse gradients.
+
+Do not overuse colors.
+
+---
+
+# MOBILE FIRST
+
+The application MUST be mobile first.
+
+Desktop should adapt naturally.
+
+The mobile version should feel almost like a native application.
+
+Bottom navigation on mobile.
+
+No tiny buttons.
+
+No overflowing cards.
+
+No horizontal scrolling.
+
+Every touch target should be comfortable.
+
+Everything should work perfectly on phones before desktop.
+
+The future goal is converting HSMHub into a PWA.
+
+Design accordingly.
+
+---
+
+# COLOR PHILOSOPHY
+
+Avoid bright random colors.
+
+Use one primary brand color.
+
+Neutral backgrounds.
+
+Readable text.
+
+Consistent success color.
+
+Consistent danger color.
+
+Consistent warning color.
+
+Do not randomly color buttons.
+
+Consistency is more important than creativity.
+
+---
+
+# TYPOGRAPHY
+
+Readable.
+
+Modern.
+
+Professional.
+
+Strong visual hierarchy.
+
+Titles.
+
+Section titles.
+
+Card titles.
+
+Descriptions.
+
+Metadata.
+
+Everything should clearly communicate importance.
+
+---
+
+# LANDING PAGE
+
+Guests should immediately understand what HSMHub is.
+
+Hero section should explain
+
+"HSMHub is the Digital Community Platform of HSM College."
+
+Below that
+
+Show
+
+Trending Prediction Markets
+
+Latest News
+
+Latest Confessions
+
+Guests can browse everything.
+
+Guests CANNOT
+
+Vote
+
+Bet
+
+Reply
+
+Submit News
+
+Submit Confessions
+
+Access Wallet
+
+Whenever a guest attempts an action requiring an account
+
+Open a beautiful authentication modal.
+
+Never redirect aggressively.
+
+---
+
+# GOOGLE SIGN IN
+
+Authentication uses Google Sign In only.
+
+No passwords.
+
+No email registration.
+
+After successful Google authentication
+
+DO NOT immediately finish onboarding.
+
+Redirect users to
+
+Complete Profile
+
+---
+
+# COMPLETE PROFILE
+
+Collect only
+
+Real Name
+
+Grade
+
+Stream
+
+Accept Terms
+
+Nothing else.
+
+Do not ask unnecessary questions.
+
+---
+
+# TRUST BUILDING
+
+This is extremely important.
+
+Students may hesitate to use their real names.
+
+The onboarding experience must build trust.
+
+Explain clearly that:
+
+Their real name is only used for account verification and account integrity.
+
+Anonymous posts never publicly display their real identity.
+
+The moderation interface is designed to protect anonymous posting while still allowing the platform to investigate abuse if necessary.
+
+Do not make misleading promises.
+
+Build trust through transparency.
+
+---
+
+# NEW USER EXPERIENCE
+
+After profile completion
+
+Automatically create the user profile.
+
+Automatically create wallet.
+
+Automatically credit
+
+Rs.100,000 Virtual Cash.
+
+IMPORTANT
+
+There is currently a bug where new users do not receive the starting balance.
+
+Fix this completely.
+
+The starting balance must always be created exactly once.
+
+Never duplicate it.
+
+Never miss it.
+
+Log the transaction.
+
+---
+
+# HOME PAGE
+
+The home page should no longer feel like only a prediction market.
+
+Instead it should feel like the homepage of HSMHub.
+
+Sections should include:
+
+Trending Prediction Markets
+
+Trending News
+
+Trending Confessions
+
+Recently Added
+
+Announcements (optional)
+
+Do not overload the page.
+
+Use progressive disclosure.
+
+Only show a few items from each category.
+
+Allow users to navigate deeper if interested.
+
+The homepage should immediately answer one question:
+
+"What is happening in my college today?"
+
+---
+
+# NAVIGATION
+
+Desktop Navigation
+
+Home
+
+Prediction
+
+Newz
+
+Confession
+
+Notifications
+
+Profile
+
+Wallet should NOT occupy a full navigation item.
+
+Represent wallet using a beautiful icon showing current balance.
+
+Notifications should also use an icon.
+
+Profile should use avatar.
+
+Mobile Navigation
+
+Home
+
+Prediction
+
+Newz
+
+Confession
+
+Profile
+
+Wallet and Notifications should remain quickly accessible.
+
+Navigation should always remain simple.
+
+---
+
+# GENERAL UI RULES
+
+Every page should have:
+
+Loading State
+
+Empty State
+
+Error State
+
+Success State
+
+Skeleton Loaders
+
+Responsive Layout
+
+Consistent spacing
+
+Beautiful transitions
+
+Nothing should suddenly appear.
+
+Everything should animate naturally.
+
+Avoid flashy animations.
+
+Performance is more important than visual effects.
+
+---
+
+# FINAL GOAL OF PART 1
+
+When someone opens HSMHub for the first time, they should think:
+
+"This feels like a real app made by professionals, not a student project."
+
+# HSMHub Master Prompt - Part 2
+
+## Wallet Economy, HSM Newz, Confession System, Reply System, Notifications & User Flow
+
+This document continues the previous master prompt.
+
+Do not redesign anything from Part 1.
+
+Everything below should integrate perfectly with the existing HSMHub architecture.
+
+---
+
+# CORE PRINCIPLE
+
+The entire platform is powered by ONE virtual economy.
+
+Everything earns money.
+
+Everything spends money.
+
+Every transaction must be recorded.
+
+Users should care about their wallet because it affects what they can do on the platform.
+
+Money should never disappear without explanation.
+
+Every deduction, reward or refund must generate a wallet transaction record and a notification.
+
+---
+
+# STARTING BALANCE
+
+Every newly registered user receives
+
+Rs.100,000 Virtual Cash
+
+ONLY ONCE.
+
+Never duplicate.
+
+Never miss.
+
+If the wallet creation fails during registration, automatically retry.
+
+Wallet creation and initial balance must be treated as one successful onboarding transaction.
+
+Transaction Log
+
++100000
+
+Reason:
+
+Welcome Bonus
+
+---
+
+# WALLET PAGE
+
+The wallet page should look premium.
+
+Display
+
+Current Balance
+
+Wallet History
+
+Prediction Profit/Loss
+
+Rewards Earned
+
+Money Spent
+
+Refunds
+
+Recent Activity
+
+Everything should have timestamps.
+
+Every transaction should have a reason.
+
+Example
+
++2000
+
+Reward
+
+News reached 100 Upvotes
+
+---
+
+-1000
+
+Posted News
+
+---
+
++1000
+
+Refund
+
+News Rejected
+
+---
+
+-10000
+
+Confession Reply
+
+---
+
+# MONEY RULES
+
+Posting News
+
+Cost
+
+Rs.1000
+
+Money is NOT deducted immediately.
+
+Money is deducted ONLY AFTER ADMIN APPROVES.
+
+If rejected
+
+Money stays untouched.
+
+Notification sent.
+
+---
+
+Posting Confession
+
+Cost
+
+Rs.1000
+
+Money deducted only after approval.
+
+Rejected
+
+No deduction.
+
+---
+
+Replying to Confession
+
+Cost
+
+Rs.10000
+
+Only one approved reply allowed per confession.
+
+Money deducted only after approval.
+
+Rejected
+
+No deduction.
+
+---
+
+Prediction Market
+
+Uses existing logic.
+
+Do not modify.
+
+---
+
+# NEWS REWARD SYSTEM
+
+The purpose of rewards is encouraging quality news.
+
+Reward only once per milestone.
+
+Suggested milestones
+
+50 Upvotes
+
+Reward
+
++1000
+
+100 Upvotes
+
+Reward
+
++2000
+
+250 Upvotes
+
+Reward
+
++5000
+
+500 Upvotes
+
+Reward
+
++10000
+
+Reward should never be duplicated.
+
+Each milestone can only be rewarded once.
+
+Everything automated.
+
+Notification example
+
+Congratulations!
+
+Your news reached 100 Upvotes.
+
+You earned Rs.2000.
+
+---
+
+# CONFESSION REWARD SYSTEM
+
+Same reward structure.
+
+50 Upvotes
+
++1000
+
+100 Upvotes
+
++2000
+
+250 Upvotes
+
++5000
+
+500 Upvotes
+
++10000
+
+Only reward once.
+
+Everything automatic.
+
+---
+
+# HSM NEWZ
+
+Students become campus reporters.
+
+Submission Form
+
+Required
+
+Title
+
+Content
+
+Optional
+
+Short Description
+
+Cover Image
+
+Anonymous Toggle
+
+---
+
+Before Submission
+
+Display community guidelines.
+
+Explain clearly
+
+Fake News
+
+Harassment
+
+Sexual Content
+
+Racism
+
+Threats
+
+Personal Attacks
+
+Defamation
+
+Illegal Content
+
+Will be rejected.
+
+---
+
+Anonymous Mode
+
+If enabled
+
+Public sees
+
+Anonymous
+
+Normal users never see identity.
+
+Moderator approval interface should focus on reviewing the content, not exposing the author's identity during routine moderation.
+
+---
+
+# NEWS APPROVAL FLOW
+
+Create News
+
+↓
+
+Pending
+
+↓
+
+Admin Review
+
+↓
+
+Approve
+
+↓
+
+Deduct Rs.1000
+
+↓
+
+Publish
+
+↓
+
+Eligible for rewards
+
+If rejected
+
+Reject
+
+↓
+
+Notification
+
+↓
+
+No deduction
+
+---
+
+# CONFESSION
+
+Confession should feel extremely simple.
+
+Required
+
+Content
+
+Optional
+
+Anonymous Toggle
+
+Category (optional)
+
+Examples
+
+Love
+
+Funny
+
+Question
+
+Story
+
+Appreciation
+
+Random
+
+No title required.
+
+Each confession gets
+
+Confession #001
+
+Confession #002
+
+Confession #003
+
+Automatically.
+
+Newest first.
+
+---
+
+# CONFESSION RULES
+
+Maximum one reply.
+
+No editing after approval.
+
+Delete only by administrator.
+
+No duplicate rewards.
+
+No abusive content.
+
+No doxxing.
+
+No explicit sexual content.
+
+No hate speech.
+
+---
+
+# REPLY SYSTEM
+
+Every confession card has
+
+Three Dot Menu
+
+↓
+
+Reply
+
+Reply costs
+
+Rs.10000
+
+Reply enters moderation.
+
+Approved
+
+↓
+
+Published anonymously.
+
+Rejected
+
+↓
+
+Refund
+
+↓
+
+Notification.
+
+After one approved reply
+
+Reply button disappears forever.
+
+No second reply allowed.
+
+---
+
+# NOTIFICATIONS
+
+Every major event generates notification.
+
+Examples
+
+Welcome to HSMHub.
+
+Wallet Created.
+
+News Approved.
+
+News Rejected.
+
+Confession Approved.
+
+Confession Rejected.
+
+Reply Approved.
+
+Reply Rejected.
+
+Prediction Won.
+
+Prediction Lost.
+
+Reward Earned.
+
+Refund Processed.
+
+Notifications should look modern.
+
+Unread badge.
+
+Mark all as read.
+
+Grouped by date.
+
+---
+
+# USER PROFILE
+
+Display
+
+Avatar
+
+Name
+
+Grade
+
+Wallet
+
+Prediction Statistics
+
+News Posted
+
+Confessions Posted
+
+Member Since
+
+Never expose anonymous history publicly.
+
+---
+
+# USER EXPERIENCE RULES
+
+Never surprise users with hidden deductions.
+
+Always explain before money is spent.
+
+Always confirm expensive actions.
+
+Always explain rewards.
+
+Every successful action should feel satisfying.
+
+Every rejected action should explain why.
+
+---
+
+# LOADING STATES
+
+Every submission
+
+↓
+
+Loading Animation
+
+↓
+
+Success Animation
+
+↓
+
+Confirmation Message
+
+Never leave users wondering if something happened.
+
+---
+
+# EMPTY STATES
+
+No News
+
+Show friendly illustration.
+
+No Confessions
+
+Encourage first confession.
+
+No Notifications
+
+Show friendly message.
+
+No Wallet History
+
+Explain that transactions will appear after activity.
+
+---
+
+# FINAL GOAL OF PART 2
+
+Users should understand the virtual economy naturally without reading documentation.
+
+Every wallet transaction should feel fair, transparent and meaningful.
+
+The News and Confession systems should be simple to use, trustworthy, and rewarding while encouraging quality contributions instead of spam.
+
+# HSMHub Master Prompt – Part 3 (Condensed)
+
+## Architecture, Performance, Firestore, Security, Admin Dashboard & Production Standards
+
+Continue from Part 1 and Part 2. Do not redesign previously approved features. Preserve the existing Prediction Market logic while implementing the following engineering and architecture requirements.
+
+---
+
+# ARCHITECTURE
+
+HSMHub must be built using a modular architecture.
+
+Each feature should be independent:
+
+* Prediction Market
+* HSM Newz
+* Confessions
+* Replies
+* Wallet
+* Notifications
+* Profile
+* Admin Dashboard
+
+Each module should have its own services, UI components, validation, and business logic. Avoid tightly coupling unrelated features.
+
+---
+
+# DATABASE DESIGN
+
+Organize data into clear collections (or equivalent structures):
+
+* Users
+* Wallet Transactions
+* Prediction Markets
+* Bets
+* News
+* Confessions
+* Replies
+* Notifications
+* Reports
+* Settings
+
+Store images outside the database (for example, in cloud storage) and keep only image URLs in the database.
+
+Every document should include:
+
+* Created At
+* Updated At
+* Created By (internal reference)
+* Status
+* Unique ID
+
+---
+
+# PERFORMANCE
+
+The application should feel instant.
+
+Requirements:
+
+* Lazy load images.
+* Paginate all feeds.
+* Load 20 items initially.
+* Load more only when needed.
+* Avoid loading the entire collection.
+* Minimize unnecessary re-renders.
+* Optimize bundle size.
+* Compress uploaded images.
+* Use skeleton loaders while content loads.
+
+---
+
+# FIRESTORE OPTIMIZATION
+
+Design to reduce cost and improve scalability.
+
+* Never fetch an entire collection.
+* Fetch only required fields where possible.
+* Use pagination for feeds.
+* Avoid unnecessary real-time listeners.
+* Use indexes for common queries.
+* Cache data when appropriate.
+* Store only URLs for uploaded images.
+* Archive or delete old rejected content after a retention period if it is no longer needed.
+
+Important: Voting cannot be implemented with **zero reads and zero writes**. Every persisted vote must update some state. The goal is to minimize operations, not eliminate them entirely.
+
+---
+
+# VOTING SYSTEM
+
+Each authenticated user can vote only once per post.
+
+Allow:
+
+* Upvote
+* Downvote
+
+Users can change or remove their vote.
+
+Prevent duplicate voting.
+
+Do not trust client-side checks alone.
+
+Use efficient aggregation strategies so the feed does not need to recalculate every vote on each page load.
+
+---
+
+# ANTI-SPAM
+
+Prevent abuse by:
+
+* Rate limiting submissions.
+* Preventing duplicate content.
+* Limiting repeated actions within a short period.
+* Rejecting oversized uploads.
+* Logging suspicious activity.
+* Allowing administrators to suspend abusive accounts.
+
+---
+
+# WALLET SECURITY
+
+All wallet changes must be performed by trusted backend logic.
+
+Clients must never be able to:
+
+* Increase balance.
+* Edit transaction history.
+* Reward themselves.
+* Refund themselves.
+
+Every balance change must create a transaction log with:
+
+* Amount
+* Reason
+* Timestamp
+* Related entity (market, news, confession, reply)
+
+---
+
+# ADMIN DASHBOARD
+
+Create separate management sections for:
+
+Prediction Markets
+
+* Create
+* Edit
+* Resolve
+* Cancel
+
+News
+
+* Pending
+* Approved
+* Rejected
+
+Confessions
+
+* Pending
+* Approved
+* Rejected
+
+Replies
+
+* Pending
+* Approved
+* Rejected
+
+Users
+
+* Search
+* Suspend
+* Restore
+* Wallet overview
+
+Notifications
+
+* Broadcast announcements
+* System notices
+
+Analytics
+
+* Daily Active Users
+* Total Users
+* Total Bets
+* Total News
+* Total Confessions
+* Wallet circulation
+
+Settings
+
+* Reward values
+* Submission costs
+* Platform configuration
+
+---
+
+# MODERATION
+
+Moderators should review content quickly.
+
+Display the content clearly with actions:
+
+* Approve
+* Reject
+* Report
+* Suspend (where appropriate)
+
+Provide a rejection reason so users receive meaningful notifications.
+
+---
+
+# NOTIFICATIONS
+
+Generate notifications for important events:
+
+* Welcome
+* Wallet created
+* Starting balance granted
+* News approved/rejected
+* Confession approved/rejected
+* Reply approved/rejected
+* Prediction won/lost
+* Reward granted
+* Refund processed
+* System announcement
+
+Notifications should support read/unread state.
+
+---
+
+# ERROR HANDLING
+
+Every operation should provide clear feedback.
+
+Examples:
+
+* Submission successful.
+* Submission rejected.
+* Network error.
+* Wallet update failed.
+* Image upload failed.
+
+Avoid exposing technical error messages to users.
+
+---
+
+# RESPONSIVE DESIGN
+
+The application must work smoothly on:
+
+* Mobile
+* Tablet
+* Desktop
+
+No horizontal scrolling.
+
+Touch-friendly controls.
+
+Responsive cards.
+
+Responsive typography.
+
+Bottom navigation on mobile.
+
+---
+
+# ACCESSIBILITY
+
+Support:
+
+* Keyboard navigation where practical.
+* Clear focus states.
+* Readable font sizes.
+* Good contrast.
+* Screen-reader-friendly labels for important controls.
+
+---
+
+# CODE QUALITY
+
+Write clean, maintainable code.
+
+Use reusable components.
+
+Avoid duplication.
+
+Separate UI from business logic.
+
+Validate data on the backend.
+
+Document important functions.
+
+---
+
+# PRODUCTION CHECKLIST
+
+Before release:
+
+* No console errors.
+* No broken routes.
+* No broken images.
+* All forms validated.
+* Wallet initialization bug fixed.
+* Responsive layouts verified.
+* Performance tested.
+* Security rules reviewed.
+* Moderation workflow tested.
+* Prediction Market regression-tested to ensure existing functionality still works.
+
+---
+
+# FINAL GOAL
+
+HSMHub should feel like a polished, scalable product that can grow beyond a single college. Preserve the existing Prediction Market engine while redesigning the experience around a clean, trustworthy, mobile-first community platform with strong moderation, transparent virtual economy, and efficient backend architecture.
+# HSMHub Design Bible (Condensed)
+
+## The Ultimate UI/UX Guide
+
+This document defines how HSMHub should FEEL.
+
+Do not simply make the website beautiful.
+
+Make people WANT to use it.
+
+The biggest priority is User Experience.
+
+Users should never think.
+
+Everything should feel natural.
+
+---
+
+# DESIGN PHILOSOPHY
+
+If one sentence defines HSMHub it is
+
+"Beautiful because it is simple."
+
+Do NOT design to impress developers.
+
+Design for students.
+
+Every click should feel obvious.
+
+Never overload users.
+
+Never make users search for actions.
+
+The interface should disappear and let the content become the focus.
+
+---
+
+# GENERAL LOOK
+
+Think
+
+Apple
+
+Linear
+
+Arc Browser
+
+Notion
+
+Instagram
+
+Not their colors.
+
+Not their layout.
+
+Their simplicity.
+
+Their consistency.
+
+Their spacing.
+
+Their confidence.
+
+---
+
+# SPACING
+
+Whitespace is your biggest design tool.
+
+Never cram components together.
+
+Every card should breathe.
+
+Every section should have proper spacing.
+
+Everything should align perfectly.
+
+Use a consistent spacing scale throughout the application.
+
+---
+
+# COLORS
+
+Do not use many colors.
+
+One primary brand color.
+
+Neutral background.
+
+White cards (or dark cards in dark mode).
+
+Success color.
+
+Danger color.
+
+Warning color.
+
+Information color.
+
+Never randomly color buttons.
+
+---
+
+# TYPOGRAPHY
+
+Readable.
+
+Modern.
+
+Professional.
+
+Never use decorative fonts.
+
+Titles should stand out.
+
+Descriptions should stay subtle.
+
+Metadata should be smaller.
+
+Always maintain hierarchy.
+
+---
+
+# ICONS
+
+Icons should explain actions.
+
+Not decorate.
+
+Use one consistent icon library.
+
+Every icon should have the same visual weight.
+
+Never mix icon styles.
+
+---
+
+# BUTTONS
+
+Primary Action
+
+Large
+
+Visible
+
+One primary button per screen.
+
+Secondary Actions
+
+Outlined or subtle.
+
+Danger Actions
+
+Red.
+
+Confirmation required.
+
+Never place too many primary buttons together.
+
+---
+
+# CARDS
+
+Every major feature should live inside cards.
+
+Rounded corners.
+
+Soft shadow.
+
+Comfortable padding.
+
+No unnecessary borders.
+
+Cards should never look crowded.
+
+---
+
+# FORMS
+
+Only ask necessary information.
+
+Large input fields.
+
+Clear labels.
+
+Helpful placeholders.
+
+Real-time validation.
+
+Friendly error messages.
+
+Never blame the user.
+
+---
+
+# ANIMATIONS
+
+Animations should feel natural.
+
+Fast.
+
+Smooth.
+
+Never flashy.
+
+Examples
+
+Cards fade in.
+
+Dialogs scale gently.
+
+Buttons slightly shrink when pressed.
+
+Notifications slide softly.
+
+Loading feels alive.
+
+Avoid long animations.
+
+Performance always comes first.
+
+---
+
+# LOADING
+
+Never show blank pages.
+
+Use skeleton loading.
+
+Show progress.
+
+Make waiting feel shorter.
+
+---
+
+# EMPTY STATES
+
+Never leave users staring at empty space.
+
+Instead encourage them.
+
+Examples
+
+No News
+
+"Be the first campus reporter."
+
+No Confessions
+
+"Start today's conversation."
+
+No Notifications
+
+"Everything is quiet for now."
+
+---
+
+# MOBILE EXPERIENCE
+
+Design mobile first.
+
+Large touch targets.
+
+Bottom navigation.
+
+Thumb-friendly interactions.
+
+No horizontal scrolling.
+
+Everything reachable with one hand.
+
+Feels like a native app.
+
+---
+
+# DESKTOP EXPERIENCE
+
+Desktop should not simply stretch the mobile version.
+
+Use the extra space intelligently.
+
+Keep reading widths comfortable.
+
+Avoid extremely wide text.
+
+---
+
+# HOME PAGE
+
+The homepage answers one question.
+
+"What is happening today?"
+
+Do not overload.
+
+Show only the most important items.
+
+Encourage exploration.
+
+---
+
+# NEWS PAGE
+
+News should feel like reading a premium news application.
+
+Comfortable reading width.
+
+Large cover images.
+
+Clean typography.
+
+Easy sharing.
+
+Minimal distractions.
+
+---
+
+# CONFESSION PAGE
+
+Confessions should feel safe.
+
+Anonymous.
+
+Comfortable.
+
+Reading first.
+
+Actions second.
+
+Never expose identity.
+
+Display confession number clearly.
+
+Reply should be easy to find but not visually dominant.
+
+---
+
+# PREDICTION MARKET
+
+Keep the financial information clean.
+
+Users should instantly understand:
+
+Question
+
+Options
+
+Probability
+
+Time Remaining
+
+Current Position
+
+Wallet
+
+Do not overwhelm users with unnecessary numbers.
+
+---
+
+# WALLET
+
+Users should immediately understand:
+
+Current Balance
+
+Recent Transactions
+
+Profit
+
+Loss
+
+Rewards
+
+Refunds
+
+Everything transparent.
+
+---
+
+# NOTIFICATIONS
+
+Look like modern mobile notifications.
+
+Grouped by date.
+
+Unread indicator.
+
+One tap to mark as read.
+
+---
+
+# PROFILE
+
+Minimal.
+
+Avatar.
+
+Name.
+
+Wallet.
+
+Prediction Stats.
+
+Contribution Stats.
+
+No clutter.
+
+---
+
+# SEARCH
+
+Instant.
+
+Fast.
+
+Simple.
+
+Clear empty results.
+
+---
+
+# FOOTER
+
+Simple.
+
+About HSMHub
+
+Community Guidelines
+
+Terms
+
+Privacy
+
+Contact
+
+Small note explaining that HSMHub is an independent student community platform and that inappropriate content can be reported for review.
+
+---
+
+# ACCESSIBILITY
+
+Readable fonts.
+
+Good contrast.
+
+Large tap targets.
+
+Keyboard friendly where appropriate.
+
+Screen reader labels for important controls.
+
+---
+
+# PERFORMANCE FEEL
+
+The website should feel instant.
+
+No lag.
+
+No unnecessary loading.
+
+Fast transitions.
+
+Images optimized.
+
+---
+
+# TRUST
+
+Every screen should build trust.
+
+Explain why information is collected.
+
+Explain where money goes.
+
+Explain why actions are moderated.
+
+Never hide important information.
+
+Transparency creates confidence.
+
+---
+
+# MICRO-INTERACTIONS
+
+Successful actions should feel rewarding.
+
+Errors should feel calm.
+
+Wallet increases should animate subtly.
+
+Buttons should provide tactile feedback.
+
+Notifications should feel lightweight.
+
+Every interaction should reassure the user.
+
+---
+
+# FINAL RULE
+
+Whenever there is a choice between adding another feature or making the experience simpler, choose simplicity.
+
+The goal is not to create the website with the most features.
+
+The goal is to create the website students enjoy using every day because it feels clean, trustworthy, and effortless.

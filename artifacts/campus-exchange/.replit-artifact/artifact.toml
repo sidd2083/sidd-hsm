@@ -5,10 +5,6 @@ version = "1.0.0"
 id = "artifacts/campus-exchange"
 router = "path"
 
-[[integratedSkills]]
-name = "react-vite"
-version = "1.0.0"
-
 [[services]]
 name = "web"
 paths = [ "/" ]
@@ -19,8 +15,8 @@ run = "pnpm --filter @workspace/campus-exchange run dev"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/campus-exchange", "run", "build" ]
-publicDir = "artifacts/campus-exchange/dist/public"
 serve = "static"
+publicDir = "artifacts/campus-exchange/dist/public"
 
 [[services.production.rewrites]]
 from = "/*"
